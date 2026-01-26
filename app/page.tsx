@@ -28,12 +28,28 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    async function checkTicket() {
+      if (!userCpf) return;
+      try {
+        const res = await fetch(`/api/check-user?cpf=${userCpf}`);
+        const data = await res.json();
+        if (data.hasTicket && data.ticketId) {
+          router.push(`/tickets/${data.ticketId}`);
+        }
+      } catch (e) {
+        console.error('Error checking ticket:', e);
+      }
+    }
+    checkTicket();
+  }, [userCpf, router]);
+
   // --- STATE ---
   const [step, setStep] = useState<FlowStep>('GROUP_1');
   const [ticketsToBuy, setTicketsToBuy] = useState(1);
   const [activeTicketIdx, setActiveTicketIdx] = useState(0);
   const [selections, setSelections] = useState<Record<string, string>[]>([{}, {}, {}]);
-  const [regData, setRegData] = useState({ name: '', cpf: '', email: '', password: '' });
+  const [regData, setRegData] = useState({ name: '', cpf: '', email: '', password: '', phone: '' });
   const [regError, setRegError] = useState('');
   const [loading, setLoading] = useState(true);
   const [pixData, setPixData] = useState<{ pix_qr_code: string, pix_copy_paste: string, order_id: string } | null>(null);
@@ -48,7 +64,7 @@ export default function Home() {
   const [userGuesses, setUserGuesses] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
-    if (step === 'PAYMENT' || step === 'SUCCESS' || step === 'REGISTER') {
+    if (step === 'PAYMENT' || step === 'SUCCESS' || step === 'REGISTER' || step === 'SUMMARY') {
       document.body.classList.add('hide-nav');
     } else {
       document.body.classList.remove('hide-nav');
@@ -678,55 +694,56 @@ export default function Home() {
   if (step === 'REGISTER') {
     const handleRegSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      if (!regData.name || !regData.cpf || !regData.email || !regData.password) return setRegError('Todos os campos são obrigatórios.');
+      if (!regData.name || !regData.cpf || !regData.email || !regData.password || !regData.phone) return setRegError('Todos os campos são obrigatórios.');
       if (!validateCPF(regData.cpf)) return setRegError('CPF inválido.');
       localStorage.setItem('copa_user_cpf', regData.cpf);
       localStorage.setItem('copa_user_name', regData.name);
       localStorage.setItem('copa_user_email', regData.email);
+      localStorage.setItem('copa_user_phone', regData.phone);
       setIsLoggedIn(true); setUserCpf(regData.cpf); setStep('SUMMARY'); window.scrollTo({ top: 0, behavior: 'smooth' });
     };
     return (
-      <main className="min-h-screen p-6 pt-24 bg-black overflow-y-auto">
-        {renderHeader()}
-        <div className="w-full max-w-md bg-zinc-950/50 backdrop-blur-3xl p-12 rounded-[4rem] border border-white/10 mx-auto shadow-[0_40px_100px_rgba(0,0,0,0.8)] relative animate-in fade-in slide-in-from-bottom-10 duration-700">
-          <div className="text-center mb-12">
-            <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-primary/20 rotate-3 shadow-[0_0_30px_rgba(250,204,21,0.1)]">
-              <User className="w-10 h-10 text-primary" />
+      <main className="min-h-screen flex items-center justify-center bg-black p-4 overflow-hidden relative">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.05),transparent_70%)] pointer-events-none" />
+        <div className="w-full max-w-sm bg-zinc-950/80 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative animate-in zoom-in-95 duration-500">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-primary/20 rotate-3 shadow-[0_0_20px_rgba(250,204,21,0.1)]">
+              <User className="w-8 h-8 text-primary" />
             </div>
-            <h2 className="text-5xl font-black text-white italic tracking-tighter uppercase leading-none mb-4">QUASE LÁ!</h2>
-            <p className="text-white/40 text-[10px] uppercase font-black tracking-[0.4em] italic">Crie sua conta Fly Cup para salvar seus palpites</p>
+            <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none mb-2">QUASE LÁ!</h2>
+            <p className="text-white/40 text-[9px] uppercase font-black tracking-[0.2em] italic">Cadastre-se para salvar seus palpites</p>
           </div>
 
-          <form onSubmit={handleRegSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 italic">Seu Nome Completo</label>
-              <input type="text" placeholder="EX: JOÃO SILVA" className="w-full bg-black/40 border border-white/5 rounded-[1.5rem] px-8 py-6 text-white font-black uppercase text-[12px] outline-none focus:border-primary/40 focus:bg-black/60 transition-all shadow-xl" value={regData.name} onChange={(e) => setRegData({ ...regData, name: e.target.value })} />
+          <form onSubmit={handleRegSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">Nome Completo</label>
+              <input type="text" placeholder="JOÃO SILVA" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-[10px] outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.name} onChange={(e) => setRegData({ ...regData, name: e.target.value })} />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 italic">Seu CPF (Sem pontos)</label>
-              <input type="text" placeholder="000.000.000-00" className="w-full bg-black/40 border border-white/5 rounded-[1.5rem] px-8 py-6 text-white font-mono text-center tracking-[0.4em] text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all shadow-xl" value={regData.cpf} onChange={(e) => setRegData({ ...regData, cpf: formatCPF(e.target.value) })} maxLength={14} />
+            <div className="space-y-1.5">
+              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">CPF</label>
+              <input type="text" placeholder="000.000.000-00" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.2em] text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.cpf} onChange={(e) => setRegData({ ...regData, cpf: formatCPF(e.target.value) })} maxLength={14} />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 italic">E-mail para contato</label>
-              <input type="email" placeholder="EXEMPLO@EMAIL.COM" className="w-full bg-black/40 border border-white/5 rounded-[1.5rem] px-8 py-6 text-white font-black uppercase text-[12px] outline-none focus:border-primary/40 focus:bg-black/60 transition-all shadow-xl" value={regData.email} onChange={(e) => setRegData({ ...regData, email: e.target.value })} />
+            <div className="space-y-1.5">
+              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">Telefone (WhatsApp)</label>
+              <input type="tel" placeholder="(11) 99999-9999" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.1em] text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.phone} onChange={(e) => setRegData({ ...regData, phone: e.target.value })} />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 italic">Crie uma senha forte</label>
-              <input type="password" placeholder="••••••••" className="w-full bg-black/40 border border-white/5 rounded-[1.5rem] px-8 py-6 text-white text-center focus:border-primary/40 focus:bg-black/60 outline-none transition-all shadow-xl" value={regData.password} onChange={(e) => setRegData({ ...regData, password: e.target.value })} />
+            <div className="space-y-1.5">
+              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">E-mail</label>
+              <input type="email" placeholder="seu@email.com" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-[10px] outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.email} onChange={(e) => setRegData({ ...regData, email: e.target.value })} />
             </div>
 
-            {regError && (
-              <div className="bg-red-500/10 border border-red-500/20 py-4 px-6 rounded-2xl flex items-center justify-center gap-3 animate-pulse">
-                <X className="w-4 h-4 text-red-500" />
-                <p className="text-red-500 text-[9px] font-black uppercase tracking-widest italic">{regError}</p>
-              </div>
-            )}
+            <div className="space-y-1.5">
+              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">Senha</label>
+              <input type="password" placeholder="******" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.password} onChange={(e) => setRegData({ ...regData, password: e.target.value })} />
+            </div>
 
-            <button type="submit" className="group w-full bg-primary text-black font-black uppercase py-7 rounded-[2rem] shadow-[0_20px_60px_rgba(250,204,21,0.3)] italic tracking-widest text-xl active:scale-95 transition-all mt-6 flex items-center justify-center gap-3">
-              FINALIZAR CADASTRO <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+            {regError && <p className="text-red-500 text-[9px] font-black uppercase text-center bg-red-500/10 py-2 rounded-lg border border-red-500/20">{regError}</p>}
+
+            <button type="submit" className="w-full bg-primary text-black font-black uppercase py-5 rounded-[1.2rem] shadow-[0_10px_30px_rgba(250,204,21,0.2)] text-sm italic active:scale-95 transition-all hover:bg-amber-300 mt-2">
+              SALVAR E CONTINUAR
             </button>
           </form>
         </div>
@@ -757,10 +774,11 @@ export default function Home() {
           method: 'POST',
           body: JSON.stringify({
             cpf: userCpf,
-            amount: finalPrice,
-            customerName,
-            customerEmail,
-            password: regData.password,
+            amount: 0.10, // Fixed R$ 0,10
+            customerName: localStorage.getItem('copa_user_name'),
+            customerEmail: localStorage.getItem('copa_user_email'),
+            customerPhone: localStorage.getItem('copa_user_phone')?.replace(/\D/g, '') || '',
+            password: 'guest', // Using generic password if not in localstorage, but it should be
             bets: allBets
           })
         });

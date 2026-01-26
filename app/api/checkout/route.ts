@@ -4,7 +4,7 @@ import { getAdminClient } from '@/lib/supabase';
 // This would be a real Pagarme API call in production
 export async function POST(req: Request) {
     try {
-        const { cpf, amount, customerName, customerEmail, password, bets } = await req.json();
+        const { cpf, amount, customerName, customerEmail, customerPhone, password, bets } = await req.json();
         const supabase = getAdminClient();
         const apiKey = process.env.PAGARME_API_KEY;
 
@@ -65,8 +65,8 @@ export async function POST(req: Request) {
                     phones: {
                         mobile_phone: {
                             country_code: '55',
-                            area_code: '11',
-                            number: '999999999'
+                            area_code: customerPhone ? customerPhone.replace(/\D/g, '').slice(0, 2) : '11',
+                            number: customerPhone ? customerPhone.replace(/\D/g, '').slice(2) : '999999999'
                         }
                     }
                 },
