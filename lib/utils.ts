@@ -20,9 +20,10 @@ export function validateCPF(cpf: string) {
     return clean.length === 11;
 }
 export function formatPhone(value: string) {
-    return value
-        .replace(/\D/g, '')
-        .replace(/(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{5})(\d)/, '$1-$2')
-        .replace(/(-\d{4})\d+?$/, '$1');
+    const clean = value.replace(/\D/g, '');
+    if (clean.length > 11) return clean.slice(0, 11); // Limit to 11 digits
+
+    if (clean.length <= 2) return clean;
+    if (clean.length <= 7) return `(${clean.slice(0, 2)}) ${clean.slice(2)}`;
+    return `(${clean.slice(0, 2)}) ${clean.slice(2, 7)}-${clean.slice(7, 11)}`;
 }

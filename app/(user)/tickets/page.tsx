@@ -33,6 +33,7 @@ export default function MyTickets() {
                     .from('tickets')
                     .select('*, bets(*)')
                     .eq('cpf', storedCpf)
+                    .eq('status', 'ACTIVE') // Apenas bilhetes pagos/ativos
                     .order('created_at', { ascending: false });
 
                 if (error) {

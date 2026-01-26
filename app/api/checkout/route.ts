@@ -82,6 +82,7 @@ export async function POST(req: Request) {
                 }
             ],
             shipping: {
+                description: `Envio do Bilhete Copa Fly`, // Added required description field
                 address: genericAddress
             },
             payments: [
