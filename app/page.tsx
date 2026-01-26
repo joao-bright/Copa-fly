@@ -62,6 +62,8 @@ export default function Home() {
   const [pixCopied, setPixCopied] = useState(false);
   const [guessesLocked, setGuessesLocked] = useState(false);
   const [userGuesses, setUserGuesses] = useState<Record<string, string> | null>(null);
+  const [hasExistingTicket, setHasExistingTicket] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   // Persistence: Save state on change
   useEffect(() => {
@@ -112,20 +114,20 @@ export default function Home() {
         const isLocked = locked?.value === true || locked?.value === 'true';
         setGuessesLocked(isLocked);
 
-        if (isLocked) {
-          const cpf = localStorage.getItem('copa_user_cpf');
-          if (cpf) {
-            const { data: tickets } = await supabase
-              .from('tickets')
-              .select('id, bets(*)')
-              .eq('cpf', cpf)
-              .eq('status', 'ACTIVE')
-              .order('created_at', { ascending: false })
-              .limit(1);
+        const cpf = localStorage.getItem('copa_user_cpf');
+        if (cpf) {
+          const { data: tickets } = await supabase
+            .from('tickets')
+            .select('id, status, bets(*)')
+            .eq('cpf', cpf)
+            .order('created_at', { ascending: false });
 
-            if (tickets && tickets[0]) {
+          const activeTicket = tickets?.find(t => t.status === 'ACTIVE' || t.status === 'PENDING');
+          if (activeTicket) {
+            setHasExistingTicket(true);
+            if (isLocked) {
               const picks: Record<string, string> = {};
-              tickets[0].bets.forEach((b: any) => {
+              activeTicket.bets.forEach((b: any) => {
                 picks[b.match_id] = b.selected_team_id;
               });
               setUserGuesses(picks);
@@ -133,6 +135,13 @@ export default function Home() {
           }
         }
       }
+
+      // Show tutorial if first time
+      const tutorialSeen = localStorage.getItem('copa_tutorial_seen');
+      if (!tutorialSeen) {
+        setShowTutorial(true);
+      }
+
       setLoading(false);
     };
     fetchData();
@@ -293,6 +302,53 @@ export default function Home() {
       )}
     </header>
   );
+
+  const renderTutorial = () => {
+    if (!showTutorial) return null;
+    return (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl animate-in fade-in duration-500">
+        <div className="w-full max-w-sm glass-panel p-10 rounded-[3.5rem] border border-white/10 shadow-3xl relative overflow-hidden text-center animate-in zoom-in-95 duration-500">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+          <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-primary/20 rotate-6 shadow-[0_0_30px_rgba(250,204,21,0.1)]">
+            <Sparkles className="w-10 h-10 text-primary" />
+          </div>
+          <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none mb-6">COMO <br /> <span className="text-primary not-italic font-sans">FUNCIONA?</span></h2>
+          <div className="space-y-6 text-left mb-10">
+            <div className="flex gap-4">
+              <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/40 flex-shrink-0 flex items-center justify-center text-[10px] font-black text-primary">1</div>
+              <div>
+                <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">DÊ SEUS PALPITES</h3>
+                <p className="text-[8px] text-white/30 font-black uppercase leading-tight italic">Escolha os vencedores de cada rodada até a grande final.</p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/40 flex-shrink-0 flex items-center justify-center text-[10px] font-black text-primary">2</div>
+              <div>
+                <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">PAGUE O BILHETE</h3>
+                <p className="text-[8px] text-white/30 font-black uppercase leading-tight italic">Realize o pagamento via Pix para validar seu palpite oficialmente.</p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/40 flex-shrink-0 flex items-center justify-center text-[10px] font-black text-primary">3</div>
+              <div>
+                <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">CONCORRA AO PRÊMIO</h3>
+                <p className="text-[8px] text-white/30 font-black uppercase leading-tight italic">Acompanhe os resultados e lute pelo acumulado da Copa Fly!</p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              localStorage.setItem('copa_tutorial_seen', 'true');
+              setShowTutorial(false);
+            }}
+            className="w-full bg-primary text-black font-black uppercase py-5 rounded-3xl shadow-xl flex items-center justify-center gap-2 italic tracking-widest active:scale-95 transition-all text-xs"
+          >
+            COMEÇAR AGORA <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const renderProgress = () => {
     const isGroup = step.startsWith('GROUP');
@@ -605,6 +661,25 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Trava de Bilhete Único Overlay */}
+              {hasExistingTicket && (
+                <div className="absolute inset-0 z-[100] backdrop-blur-md bg-black/60 flex items-center justify-center p-6 animate-in fade-in duration-500">
+                  <div className="glass-panel p-8 rounded-[2.5rem] border border-white/10 shadow-3xl text-center max-w-sm">
+                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/20 rotate-12">
+                      <ShieldCheck className="w-8 h-8 text-primary" />
+                    </div>
+                    <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase mb-2">BILHETE JÁ REGISTRADO</h2>
+                    <p className="text-white/40 text-[9px] uppercase font-black tracking-[0.2em] leading-relaxed mb-8">O limite é de 01 bilhete por CPF. <br /> Você já possui um palpite ativo!</p>
+                    <button
+                      onClick={() => router.push('/tickets')}
+                      className="w-full bg-primary text-black font-black uppercase py-4 rounded-xl shadow-lg text-xs italic active:scale-95 transition-all"
+                    >
+                      VER MEU BILHETE
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Right Column (Simulator) */}
               <div className={cn(
                 "overflow-y-auto overflow-x-hidden pb-48 scrollbar-hide transition-all duration-700 ease-in-out h-full",
@@ -637,6 +712,7 @@ export default function Home() {
           </div>
         </main>
 
+        {renderTutorial()}
 
         <style jsx global>{`
           .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -647,6 +723,9 @@ export default function Home() {
           }
           .animate-bounce-x {
             animation: bounce-x 1s infinite;
+          }
+          .hide-nav nav {
+            display: none !important;
           }
         `}</style>
       </div>
@@ -709,6 +788,22 @@ export default function Home() {
             </button>
           </div>
         </div>
+        {renderTutorial()}
+
+        <style jsx global>{`
+          .scrollbar-hide::-webkit-scrollbar { display: none; }
+          .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+          @keyframes bounce-x {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+          }
+          .animate-bounce-x {
+            animation: bounce-x 1s infinite;
+          }
+          .hide-nav nav {
+            display: none !important;
+          }
+        `}</style>
       </main>
     );
   }
@@ -856,18 +951,8 @@ export default function Home() {
 
           <button
             onClick={async () => {
-              // Limpar persistência do quiz ao pagar
-              const clearPersistence = () => {
-                localStorage.removeItem('copa_step');
-                localStorage.setItem('copa_selections', JSON.stringify([{}, {}, {}]));
-              };
-
-              // Feedback para o usuário conforme áudio
-              alert('O Pix demora no máximo 1 minuto para ser processado. Clique em OK para carregar seus bilhetes ativos!');
-
-              clearPersistence();
-              setStep('SUCCESS');
-              window.scrollTo(0, 0);
+              // Feedback informativo conforme áudio: o usuário permanece na tela
+              alert('O Pix demora no máximo 1 minuto para ser processado. Assim que o pagamento for confirmado, sua tela será atualizada automaticamente ou você poderá ver seus bilhetes no menu.');
             }}
             className="w-full bg-primary text-black font-black uppercase py-6 rounded-[2rem] shadow-[0_20px_60px_rgba(250,204,21,0.4)] text-base sm:text-2xl italic active:scale-95 transition-all relative z-[110]"
           >
@@ -880,20 +965,26 @@ export default function Home() {
 
   if (step === 'SUCCESS') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-10 bg-black text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.1),transparent_70%)]" />
-        <div className="w-40 h-40 rounded-[3.5rem] bg-green-500 flex items-center justify-center mb-12 shadow-[0_0_100px_rgba(34,197,94,0.5)] animate-bounce relative z-10"><CheckCircle2 className="w-20 h-20 text-black" /></div>
-        <h2 className="text-6xl font-black text-white italic tracking-tighter uppercase mb-6 leading-none relative z-10">TUDO PRONTO!</h2>
-        <p className="text-white/40 mb-16 uppercase text-[12px] font-black tracking-[0.5em] italic relative z-10">Desejamos boa sorte na Copa Fly!</p>
-        <div className="space-y-4 w-full max-w-xs relative z-10 px-6">
-          <button onClick={() => router.push('/tickets')} className="w-full bg-white text-black font-black py-7 rounded-[2.5rem] shadow-3xl italic tracking-[0.2em] text-xl active:scale-95 transition-all group flex items-center justify-center gap-3">
-            VER MEUS BILHETES <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-black text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.05),transparent_70%)]" />
+        <div className="w-24 h-24 rounded-[2rem] bg-green-500/20 border border-green-500/40 flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(34,197,94,0.2)] animate-in zoom-in-50 duration-500 relative z-10">
+          <CheckCircle2 className="w-10 h-10 text-green-500" />
+        </div>
+        <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase mb-3 leading-none relative z-10">PALPITE REGISTRADO!</h2>
+        <p className="text-white/30 mb-12 uppercase text-[9px] font-black tracking-[0.4em] italic relative z-10 px-8">Sua sorte está lançada na Copa Fly</p>
+        <div className="space-y-3 w-full max-w-xs relative z-10 px-6">
+          <button onClick={() => router.push('/tickets')} className="w-full bg-primary text-black font-black py-5 rounded-2xl shadow-xl italic tracking-widest text-sm active:scale-95 transition-all group flex items-center justify-center gap-2">
+            VER MEUS BILHETES <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
           <button
-            onClick={() => { setStep('GROUP_1'); setTicketsToBuy(1); setActiveTicketIdx(0); window.scrollTo(0, 0); }}
-            className="w-full bg-white/5 hover:bg-white/10 text-white/40 font-black uppercase py-4 rounded-2xl text-[10px] tracking-[0.3em] transition-all italic active:scale-95 border border-white/5"
+            onClick={() => {
+              localStorage.removeItem('copa_step');
+              localStorage.setItem('copa_selections', JSON.stringify([{}, {}, {}]));
+              setStep('GROUP_1'); setTicketsToBuy(1); setActiveTicketIdx(0); window.scrollTo(0, 0);
+            }}
+            className="w-full bg-white/5 hover:bg-white/10 text-white/20 font-black uppercase py-4 rounded-xl text-[8px] tracking-[0.2em] transition-all italic active:scale-95 border border-white/5"
           >
-            FAZER NOVO PALPITE
+            NOVO PALPITE
           </button>
         </div>
       </div>
