@@ -4,7 +4,7 @@ import { getAdminClient } from '@/lib/supabase';
 // This would be a real Pagarme API call in production
 export async function POST(req: Request) {
     try {
-        const { cpf, amount, customerName, customerEmail, bets } = await req.json();
+        const { cpf, amount, customerName, customerEmail, password, bets } = await req.json();
         const supabase = getAdminClient();
         const apiKey = process.env.PAGARME_API_KEY;
 
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
                 cpf,
                 customer_name: customerName,
                 customer_email: customerEmail,
+                password, // Save the password for future login
                 status: 'PENDING',
                 total_price: amount
             }])
@@ -83,8 +84,9 @@ export async function POST(req: Request) {
         const pagarmeData = await pagarmeResponse.json();
 
         if (!pagarmeResponse.ok) {
-            console.error('Pagarme API Error:', pagarmeData);
-            throw new Error(pagarmeData.message || 'Error generating payment');
+            console.error('Pagarme API Error:', JSON.stringify(pagarmeData, null, 2));
+            const errorMsg = pagarmeData?.message || pagarmeData?.errors?.[0]?.message || 'Error generating payment';
+            throw new Error(errorMsg);
         }
 
         const charge = pagarmeData.charges?.[0];

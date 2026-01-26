@@ -96,25 +96,18 @@ export default function LoginPage() {
                         ENTRAR <LogIn className="w-5 h-5" />
                     </button>
 
-                    <div className="pt-6 border-t border-white/5 text-center">
-                        <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                            Não tem palpites ainda?
-                        </p>
-                        <button onClick={() => router.push('/')} className="mt-2 text-[11px] font-black text-primary uppercase underline italic">
-                            CRIAR NOVO BILHETE
-                        </button>
-                    </div>
-
-                    <div className="pt-2 text-center">
-                        <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                            Novo por aqui?
-                        </p>
+                    <div className="mt-10 text-center">
+                        <div className="p-6 bg-primary/5 rounded-3xl border border-primary/10 mb-8">
+                            <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest italic leading-relaxed">
+                                Para cadastrar uma nova conta,<br />preencha o seu bilhete primeiro!
+                            </p>
+                        </div>
                         <button
                             type="button"
                             onClick={() => router.push('/')}
-                            className="mt-3 w-full bg-white/5 border border-white/5 py-4 rounded-xl text-[10px] font-black text-white uppercase italic hover:bg-white/10 transition-all"
+                            className="w-full h-14 bg-zinc-900 border border-white/5 rounded-2xl text-[10px] font-black text-white/40 uppercase tracking-[0.3em] italic hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2"
                         >
-                            CADASTRAR / CRIAR CONTA
+                            CRIAR NOVO BILHETE <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
                         </button>
                     </div>
                 </form>

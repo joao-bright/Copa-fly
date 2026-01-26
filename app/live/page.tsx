@@ -10,6 +10,7 @@ import { Match } from '@/lib/types';
 export default function LivePage() {
     const router = useRouter();
     const [matches, setMatches] = useState<Match[]>([]);
+    const [filter, setFilter] = useState<'LIVE' | 'FINISHED' | 'SCHEDULED'>('LIVE');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
 
@@ -142,57 +143,90 @@ export default function LivePage() {
             {renderHeader()}
 
             <div className="container mx-auto max-w-md pt-24 px-5">
-                {/* LIVE NOW SECTION */}
-                <div className="mb-12">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-500/10 border border-red-500/20">
-                            <Radio className="w-5 h-5 text-red-500 animate-pulse" />
-                        </div>
-                        <div>
-                            <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">Ao Vivo</h2>
-                            <p className="text-[8px] text-white/20 font-black uppercase tracking-[0.2em] mt-1 italic">PARTIDAS EM ANDAMENTO</p>
-                        </div>
-                    </div>
+                {/* FILTERS */}
+                <div className="flex bg-zinc-950/50 p-1 rounded-2xl border border-white/5 mb-8">
+                    {[
+                        { id: 'LIVE', label: 'AO VIVO', icon: Radio },
+                        { id: 'FINISHED', label: 'ENCERRADOS', icon: Trophy },
+                        { id: 'SCHEDULED', label: 'PRÓXIMOS', icon: Clock },
+                    ].map((t) => (
+                        <button
+                            key={t.id}
+                            onClick={() => setFilter(t.id as any)}
+                            className={cn(
+                                "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all",
+                                filter === t.id ? "bg-primary text-black" : "text-white/20 hover:text-white/40"
+                            )}
+                        >
+                            <t.icon className="w-3 h-3" />
+                            {t.label}
+                        </button>
+                    ))}
+                </div>
 
-                    {liveMatches.length === 0 ? (
+                {/* FILTERED MATCHES SECTION */}
+                <div className="mb-12">
+                    {filter === 'LIVE' && (
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-500/10 border border-red-500/20">
+                                <Radio className="w-5 h-5 text-red-500 animate-pulse" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">Em Andamento</h2>
+                                <p className="text-[8px] text-white/20 font-black uppercase tracking-[0.2em] mt-1 italic">PARTIDAS AO VIVO</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {filter === 'FINISHED' && (
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20">
+                                <Trophy className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">Encerrados</h2>
+                                <p className="text-[8px] text-white/20 font-black uppercase tracking-[0.2em] mt-1 italic">RESULTADOS FINAIS</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {filter === 'SCHEDULED' && (
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-zinc-900 border border-white/10">
+                                <Clock className="w-5 h-5 text-white/40" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">Próximos Jogos</h2>
+                                <p className="text-[8px] text-white/20 font-black uppercase tracking-[0.2em] mt-1 italic">CALENDÁRIO DA COPA</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {matches.filter(m => m.status === filter).length === 0 ? (
                         <div className="glass-panel p-10 rounded-[3rem] border border-white/5 text-center bg-white/[0.01]">
                             <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.3em] italic leading-relaxed px-6">
-                                Nenhuma partida ao vivo no momento
+                                Nenhuma partida {filter === 'LIVE' ? 'ao vivo' : filter === 'FINISHED' ? 'encerrada' : 'agendada'} no momento
                             </p>
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            {liveMatches.map(m => renderMatchCard(m, true))}
+                            {(filter === 'SCHEDULED'
+                                ? Object.entries(groupedScheduled).flatMap(([title, mms]) => mms.length > 0 ? [{ title }, ...mms] : [])
+                                : matches.filter(m => m.status === filter)
+                            ).map((item: any, idx) => {
+                                if (item.title) {
+                                    return (
+                                        <div key={`title-${idx}`} className="flex items-center gap-4 pt-6 pb-2">
+                                            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/10" />
+                                            <span className="text-[10px] font-black text-primary/60 uppercase italic tracking-[0.4em]">{item.title}</span>
+                                            <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/10" />
+                                        </div>
+                                    );
+                                }
+                                return renderMatchCard(item, filter === 'LIVE');
+                            })}
                         </div>
                     )}
-                </div>
-
-                {/* UPCOMING SECTION BY ROUNDS */}
-                <div className="space-y-16">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-white/5 border border-white/10">
-                            <Trophy className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                            <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">Próximos Jogos</h2>
-                            <p className="text-[8px] text-white/20 font-black uppercase tracking-[0.2em] mt-1 italic">CALENDÁRIO DA COPA</p>
-                        </div>
-                    </div>
-
-                    {Object.entries(groupedScheduled).map(([title, roundMatches]) => (
-                        roundMatches.length > 0 && (
-                            <div key={title} className="space-y-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/10" />
-                                    <span className="text-[10px] font-black text-primary/60 uppercase italic tracking-[0.4em] font-sans">{title}</span>
-                                    <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/10" />
-                                </div>
-                                <div className="space-y-6">
-                                    {roundMatches.map(m => renderMatchCard(m, false))}
-                                </div>
-                            </div>
-                        )
-                    ))}
                 </div>
             </div>
         </main>

@@ -442,46 +442,26 @@ export default function Home() {
         <main className="min-h-screen pb-44 flex flex-col relative overflow-x-hidden pt-20">
           <div className="container mx-auto px-4 flex-1 flex flex-col max-w-lg">
             {/* Notice Bar */}
-            <div className="flex-1 flex flex-col items-center justify-center -mt-20">
-              <div className="w-24 h-24 rounded-[2rem] bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-8 animate-pulse">
-                <Lock className="w-10 h-10 text-red-500" />
+            <div className="flex-1 flex flex-col items-center justify-center -mt-10">
+              <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6 animate-pulse">
+                <Lock className="w-6 h-6 text-red-500" />
               </div>
-              <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase text-center leading-tight mb-4 px-6">
+              <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase text-center leading-tight mb-4 px-10">
                 OS JOGOS JÁ <span className="text-red-500 not-italic">COMEÇARAM</span>
               </h2>
-              <p className="text-[12px] font-black text-red-500 uppercase tracking-[0.3em] italic text-center px-10 leading-relaxed">
-                Palpites não estão mais disponíveis para esta Copa.
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] italic text-center px-12 leading-relaxed">
+                Palpites encerrados para esta rodada.
               </p>
 
               <button
                 onClick={() => router.push('/live')}
-                className="mt-12 bg-white text-black font-black uppercase py-6 px-10 rounded-[2rem] italic tracking-widest text-lg shadow-[0_20px_50px_rgba(255,255,255,0.1)] active:scale-95 transition-all flex items-center gap-3"
+                className="mt-8 bg-white text-black font-black uppercase py-4 px-8 rounded-xl italic tracking-widest text-xs shadow-[0_20px_40px_rgba(255,255,255,0.05)] active:scale-95 transition-all flex items-center gap-2"
               >
-                ACOMPANHAR AO VIVO <ArrowRight className="w-5 h-5" />
+                ACOMPANHAR AO VIVO <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         </main>
-
-        {/* Navigation for locked state */}
-        <nav className="fixed bottom-0 w-full z-[100] glass-panel border-t border-white/5 bg-black/90 pb-8 pt-4 px-6 flex justify-around items-center">
-          <button onClick={() => router.push('/')} className="flex flex-col items-center gap-1 text-primary">
-            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20"><Radio className="w-5 h-5" /></div>
-            <span className="text-[7px] font-black uppercase tracking-widest italic">Início</span>
-          </button>
-          <button onClick={() => router.push('/live')} className="flex flex-col items-center gap-1 text-white/20 hover:text-white transition-all">
-            <div className="w-10 h-10 rounded-2xl bg-zinc-900 flex items-center justify-center border border-white/5"><Play className="w-5 h-5" /></div>
-            <span className="text-[7px] font-black uppercase tracking-widest italic">Ao Vivo</span>
-          </button>
-          <button onClick={() => router.push('/tickets')} className="flex flex-col items-center gap-1 text-white/20 hover:text-white transition-all">
-            <div className="w-10 h-10 rounded-2xl bg-zinc-900 flex items-center justify-center border border-white/5"><TicketIcon className="w-5 h-5" /></div>
-            <span className="text-[7px] font-black uppercase tracking-widest italic">Bilhetes</span>
-          </button>
-          <button onClick={() => router.push('/ranking')} className="flex flex-col items-center gap-1 text-white/20 hover:text-white transition-all">
-            <div className="w-10 h-10 rounded-2xl bg-zinc-900 flex items-center justify-center border border-white/5"><Trophy className="w-5 h-5" /></div>
-            <span className="text-[7px] font-black uppercase tracking-widest italic">Ranking</span>
-          </button>
-        </nav>
       </div>
     );
   }
@@ -793,7 +773,7 @@ export default function Home() {
   }
 
   if (step === 'PAYMENT') {
-    const finalPrice = ticketsToBuy === 1 ? 0.10 : 0.20;
+    const finalPrice = ticketsToBuy === 1 ? 1.00 : 2.00;
     const handleFinalize = async () => {
       setIsPaying(true);
       try {
@@ -818,6 +798,7 @@ export default function Home() {
             amount: finalPrice,
             customerName,
             customerEmail,
+            password: regData.password,
             bets: allBets
           })
         });
