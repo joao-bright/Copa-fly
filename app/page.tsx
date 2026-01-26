@@ -442,11 +442,24 @@ export default function Home() {
         <main className="min-h-screen pb-44 flex flex-col relative overflow-x-hidden pt-20">
           <div className="container mx-auto px-4 flex-1 flex flex-col max-w-lg">
             {/* Notice Bar */}
-            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 mb-8 flex items-center justify-center gap-3 animate-pulse">
-              <Lock className="w-4 h-4 text-red-500" />
-              <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic text-center">Os jogos já começaram, palpites não estão mais disponíveis</span>
+            <div className="flex-1 flex flex-col items-center justify-center -mt-20">
+              <div className="w-24 h-24 rounded-[2rem] bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-8 animate-pulse">
+                <Lock className="w-10 h-10 text-red-500" />
+              </div>
+              <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase text-center leading-tight mb-4 px-6">
+                OS JOGOS JÁ <span className="text-red-500 not-italic">COMEÇARAM</span>
+              </h2>
+              <p className="text-[12px] font-black text-red-500 uppercase tracking-[0.3em] italic text-center px-10 leading-relaxed">
+                Palpites não estão mais disponíveis para esta Copa.
+              </p>
+
+              <button
+                onClick={() => router.push('/live')}
+                className="mt-12 bg-white text-black font-black uppercase py-6 px-10 rounded-[2rem] italic tracking-widest text-lg shadow-[0_20px_50px_rgba(255,255,255,0.1)] active:scale-95 transition-all flex items-center gap-3"
+              >
+                ACOMPANHAR AO VIVO <ArrowRight className="w-5 h-5" />
+              </button>
             </div>
-            {renderLiveHome()}
           </div>
         </main>
 
@@ -548,6 +561,31 @@ export default function Home() {
                     />
                   </div>
                 ))}
+
+                {/* Navigation Buttons inside Scroll */}
+                <div className="pt-10 pb-20 w-full max-w-md flex flex-col gap-3">
+                  <button
+                    onClick={handleNext}
+                    disabled={!canAdvance()}
+                    className={cn(
+                      "w-full h-16 rounded-2xl font-black italic uppercase text-lg tracking-widest transition-all active:scale-95 flex items-center justify-between px-8",
+                      canAdvance()
+                        ? "bg-primary text-black shadow-[0_10px_30px_rgba(250,204,21,0.3)]"
+                        : "bg-zinc-900/50 text-white/10 border border-white/5 cursor-not-allowed"
+                    )}
+                  >
+                    <span>{step === 'FINAL' ? 'CONCLUIR' : 'PRÓXIMO PASSO'}</span>
+                    <ArrowRight className={cn("w-6 h-6", canAdvance() ? "animate-bounce-x" : "opacity-10")} />
+                  </button>
+
+                  <button
+                    onClick={handleBack}
+                    className="w-full py-4 text-[9px] font-black uppercase text-white/20 tracking-[0.4em] italic hover:text-white transition-all flex items-center justify-center gap-2"
+                    disabled={step === 'GROUP_1'}
+                  >
+                    <ChevronLeft className="w-3 h-3" /> Voltar
+                  </button>
+                </div>
               </div>
 
               {/* Right Column (Simulator) */}
@@ -582,34 +620,6 @@ export default function Home() {
           </div>
         </main>
 
-        {/* Global Floating Navigation Bar */}
-        <div className="fixed bottom-0 left-0 w-full p-4 z-[110] bg-black/95 backdrop-blur-xl border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-          <div className="max-w-lg mx-auto flex items-center gap-3">
-            {/* Back Button */}
-            <button
-              onClick={handleBack}
-              className="w-16 h-16 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all active:scale-95 flex-shrink-0"
-              disabled={step === 'GROUP_1'}
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-
-            {/* Next Button */}
-            <button
-              onClick={handleNext}
-              disabled={!canAdvance()}
-              className={cn(
-                "flex-1 h-16 rounded-2xl font-black italic uppercase text-lg tracking-widest transition-all active:scale-95 flex items-center justify-between px-8",
-                canAdvance()
-                  ? "bg-primary text-black shadow-[0_10px_30px_rgba(250,204,21,0.3)]"
-                  : "bg-zinc-900 text-white/10 border border-white/5 cursor-not-allowed"
-              )}
-            >
-              <span>{step === 'FINAL' ? 'CONCLUIR' : 'PRÓXIMO'}</span>
-              <ArrowRight className={cn("w-6 h-6", canAdvance() ? "animate-bounce-x" : "opacity-20")} />
-            </button>
-          </div>
-        </div>
 
         <style jsx global>{`
           .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -736,18 +746,46 @@ export default function Home() {
     return (
       <main className="min-h-screen p-6 pt-24 bg-black overflow-y-auto">
         {renderHeader()}
-        <div className="w-full max-w-sm glass-panel p-10 rounded-[3rem] border border-white/10 mx-auto shadow-3xl relative animate-in fade-in slide-in-from-bottom-6">
-          <div className="text-center mb-10">
-            <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-tight">QUASE LÁ!</h2>
-            <p className="text-white/20 text-[8px] uppercase font-black tracking-[0.5em] mt-3 italic">CRIE SUA CONTA PARA SALVAR</p>
+        <div className="w-full max-w-md bg-zinc-950/50 backdrop-blur-3xl p-12 rounded-[4rem] border border-white/10 mx-auto shadow-[0_40px_100px_rgba(0,0,0,0.8)] relative animate-in fade-in slide-in-from-bottom-10 duration-700">
+          <div className="text-center mb-12">
+            <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-primary/20 rotate-3 shadow-[0_0_30px_rgba(250,204,21,0.1)]">
+              <User className="w-10 h-10 text-primary" />
+            </div>
+            <h2 className="text-5xl font-black text-white italic tracking-tighter uppercase leading-none mb-4">QUASE LÁ!</h2>
+            <p className="text-white/40 text-[10px] uppercase font-black tracking-[0.4em] italic">Crie sua conta Fly Cup para salvar seus palpites</p>
           </div>
-          <form onSubmit={handleRegSubmit} className="space-y-5">
-            <input type="text" placeholder="SEU NOME COMPLETO" className="w-full bg-zinc-950 border border-white/5 rounded-2xl px-6 py-5 text-white font-black uppercase text-[10px] outline-none focus:border-primary/50 transition-all shadow-inner" value={regData.name} onChange={(e) => setRegData({ ...regData, name: e.target.value })} />
-            <input type="text" placeholder="SEU CPF" className="w-full bg-zinc-950 border border-white/5 rounded-2xl px-6 py-5 text-white font-mono text-center tracking-[0.3em] outline-none focus:border-primary/50 transition-all shadow-inner" value={regData.cpf} onChange={(e) => setRegData({ ...regData, cpf: formatCPF(e.target.value) })} maxLength={14} />
-            <input type="email" placeholder="SEU MELHOR E-MAIL" className="w-full bg-zinc-950 border border-white/5 rounded-2xl px-6 py-5 text-white font-black uppercase text-[10px] outline-none focus:border-primary/50 transition-all shadow-inner" value={regData.email} onChange={(e) => setRegData({ ...regData, email: e.target.value })} />
-            <input type="password" placeholder="CRIE UMA SENHA" className="w-full bg-zinc-950 border border-white/5 rounded-2xl px-6 py-5 text-white text-center focus:border-primary/50 transition-all shadow-inner" value={regData.password} onChange={(e) => setRegData({ ...regData, password: e.target.value })} />
-            {regError && <p className="text-red-500 text-[9px] text-center font-black uppercase italic animate-pulse">{regError}</p>}
-            <button type="submit" className="w-full bg-primary text-black font-black uppercase py-6 rounded-2xl shadow-[0_15px_40px_rgba(250,204,21,0.3)] italic tracking-widest text-xl active:scale-95 transition-all mt-4">FINALIZAR CADASTRO</button>
+
+          <form onSubmit={handleRegSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 italic">Seu Nome Completo</label>
+              <input type="text" placeholder="EX: JOÃO SILVA" className="w-full bg-black/40 border border-white/5 rounded-[1.5rem] px-8 py-6 text-white font-black uppercase text-[12px] outline-none focus:border-primary/40 focus:bg-black/60 transition-all shadow-xl" value={regData.name} onChange={(e) => setRegData({ ...regData, name: e.target.value })} />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 italic">Seu CPF (Sem pontos)</label>
+              <input type="text" placeholder="000.000.000-00" className="w-full bg-black/40 border border-white/5 rounded-[1.5rem] px-8 py-6 text-white font-mono text-center tracking-[0.4em] text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all shadow-xl" value={regData.cpf} onChange={(e) => setRegData({ ...regData, cpf: formatCPF(e.target.value) })} maxLength={14} />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 italic">E-mail para contato</label>
+              <input type="email" placeholder="EXEMPLO@EMAIL.COM" className="w-full bg-black/40 border border-white/5 rounded-[1.5rem] px-8 py-6 text-white font-black uppercase text-[12px] outline-none focus:border-primary/40 focus:bg-black/60 transition-all shadow-xl" value={regData.email} onChange={(e) => setRegData({ ...regData, email: e.target.value })} />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] ml-4 italic">Crie uma senha forte</label>
+              <input type="password" placeholder="••••••••" className="w-full bg-black/40 border border-white/5 rounded-[1.5rem] px-8 py-6 text-white text-center focus:border-primary/40 focus:bg-black/60 outline-none transition-all shadow-xl" value={regData.password} onChange={(e) => setRegData({ ...regData, password: e.target.value })} />
+            </div>
+
+            {regError && (
+              <div className="bg-red-500/10 border border-red-500/20 py-4 px-6 rounded-2xl flex items-center justify-center gap-3 animate-pulse">
+                <X className="w-4 h-4 text-red-500" />
+                <p className="text-red-500 text-[9px] font-black uppercase tracking-widest italic">{regError}</p>
+              </div>
+            )}
+
+            <button type="submit" className="group w-full bg-primary text-black font-black uppercase py-7 rounded-[2rem] shadow-[0_20px_60px_rgba(250,204,21,0.3)] italic tracking-widest text-xl active:scale-95 transition-all mt-6 flex items-center justify-center gap-3">
+              FINALIZAR CADASTRO <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+            </button>
           </form>
         </div>
       </main>

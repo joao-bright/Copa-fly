@@ -11,8 +11,17 @@ export async function POST(req: Request) {
         if (!apiKey) throw new Error('PAGARME_API_KEY not configured');
 
         // Check if guesses are locked
-        const { data: lockSettings } = await supabase.from('settings').select('value').eq('key', 'guesses_locked').single();
-        if (lockSettings?.value === true || lockSettings?.value === 'true') {
+        let guessesLocked = false;
+        try {
+            const { data: lockSettings, error: sError } = await supabase.from('settings').select('value').eq('key', 'guesses_locked').maybeSingle();
+            if (!sError && lockSettings) {
+                guessesLocked = lockSettings.value === true || lockSettings.value === 'true';
+            }
+        } catch (e) {
+            console.warn('Settings table check failed, skipping lock check:', e);
+        }
+
+        if (guessesLocked) {
             return NextResponse.json({ success: false, error: 'As apostas estão encerradas para este torneio.' }, { status: 403 });
         }
 
