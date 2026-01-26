@@ -69,9 +69,9 @@ export default function LivePage() {
             isLive ? "border-red-500/20 shadow-red-500/5 bg-red-500/[0.02]" : "border-white/10 hover:border-primary/30"
         )}>
             {isLive && (
-                <div className="absolute top-0 right-0 py-2 px-4 bg-red-500/10 border-l border-b border-red-500/20 rounded-bl-2xl flex items-center gap-1.5 z-20">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 py-2 px-4 bg-red-500/10 border border-red-500/20 rounded-full flex items-center gap-2 z-20">
                     <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                    <span className="text-[8px] font-black text-red-500 uppercase tracking-[0.2em] italic">LIVE</span>
+                    <span className="text-[8px] font-black text-red-500 uppercase tracking-[0.2em] italic">AO VIVO</span>
                 </div>
             )}
 
@@ -97,12 +97,14 @@ export default function LivePage() {
 
                 {/* Score or VS */}
                 <div className="flex flex-col items-center justify-center min-w-[60px]">
-                    {isLive ? (
+                    {isLive || m.status === 'FINISHED' ? (
                         <div className="flex flex-col items-center">
                             <div className="text-3xl font-black text-primary italic leading-none mb-1">
                                 {m.scoreA ?? 0} <span className="text-white/10 font-normal px-1">-</span> {m.scoreB ?? 0}
                             </div>
-                            <span className="text-[6px] text-white/20 font-black uppercase tracking-[0.4em] italic">PLACAR</span>
+                            <span className="text-[6px] text-white/20 font-black uppercase tracking-[0.4em] italic uppercase">
+                                {m.status === 'FINISHED' ? 'CONCLUÍDO' : 'PLACAR'}
+                            </span>
                         </div>
                     ) : (
                         <span className="text-lg font-black text-primary italic opacity-20 group-hover:opacity-100 transition-opacity">VS</span>
@@ -139,7 +141,7 @@ export default function LivePage() {
     if (!isLoaded) return <div className="min-h-screen bg-black flex items-center justify-center text-primary font-black animate-pulse uppercase tracking-[0.5em]">SINTONIZANDO...</div>;
 
     return (
-        <main className="min-h-screen bg-black pb-32">
+        <main className="min-h-screen bg-black pb-48">
             {renderHeader()}
 
             <div className="container mx-auto max-w-md pt-24 px-5">

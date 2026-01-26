@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { DollarSign, Users, Trophy, Download, RefreshCcw, TrendingUp, BarChart3, ShieldCheck, Percent, Ticket as TicketIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import { getMatches } from '@/lib/data';
 import { Ticket } from '@/lib/types';
 
 export default function AdminDashboard() {
@@ -12,8 +13,23 @@ export default function AdminDashboard() {
     const [guessesLocked, setGuessesLocked] = useState(false);
 
     const fetchData = async () => {
-        const { data: tData } = await supabase.from('tickets').select('*').order('created_at', { ascending: false });
-        if (tData) setTickets(tData as any);
+        const mData = await getMatches();
+        const { data: tData } = await supabase.from('tickets').select('*, bets(*)').order('created_at', { ascending: false });
+
+        if (tData && mData) {
+            const winnersMap: Record<string, string> = {};
+            mData.forEach((m: any) => { if (m.winnerId) winnersMap[m.id] = m.winnerId; });
+
+            const ticketsWithHits = tData.map((t: any) => {
+                let hits = 0;
+                t.bets?.forEach((b: any) => {
+                    if (winnersMap[b.match_id] === b.selected_team_id) hits += 1;
+                });
+                return { ...t, hits };
+            });
+
+            setTickets(ticketsWithHits as any);
+        }
 
         // Fetch retention and lock status from settings table
         const { data: sData } = await supabase.from('settings').select('*');
@@ -218,20 +234,31 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
                 <div className="glass-panel p-10 rounded-[3.5rem] border border-white/5 shadow-2xl bg-gradient-to-br from-white/[0.01] to-transparent">
-                    <h3 className="text-xl font-black italic uppercase tracking-tighter mb-8 border-b border-white/5 pb-4">Top Atividades</h3>
+                    <h3 className="text-xl font-black italic uppercase tracking-tighter mb-8 border-b border-white/5 pb-4 flex justify-between items-center">
+                        Top Ranking
+                        <span className="text-[10px] bg-primary/20 text-primary px-3 py-1 rounded-full">POR ACERTOS</span>
+                    </h3>
                     <div className="space-y-6">
-                        {tickets.slice(0, 5).map(t => (
+                        {[...tickets].sort((a: any, b: any) => (b.hits || 0) - (a.hits || 0)).slice(0, 10).map((t: any) => (
                             <div key={t.id} className="flex items-center justify-between py-4 border-b border-white/[0.03] last:border-0">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center">
-                                        <TicketIcon className="w-5 h-5 text-primary/40" />
+                                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center font-black italic text-xs text-primary">
+                                        {(t.hits || 0)}
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-white/60 uppercase tracking-wider leading-none mb-1">{(t as any).customer_name || 'Novo Bilhete'}</span>
+                                        <span className="text-[10px] font-black text-white/60 uppercase tracking-wider leading-none mb-1">{t.customer_name || 'Usuário Fly'}</span>
                                         <span className="text-[9px] font-black text-white/10 uppercase tracking-widest italic">{t.cpf}</span>
                                     </div>
                                 </div>
-                                <span className="text-[10px] font-mono text-white/10">{t.createdAt ? new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}</span>
+                                <div className="flex flex-col items-end">
+                                    <span className={cn(
+                                        "text-[7px] font-black uppercase px-2 py-1 rounded-md mb-1",
+                                        t.status === 'PAID' || t.status === 'ACTIVE' ? "bg-green-500/10 text-green-500" : "bg-zinc-800 text-white/20"
+                                    )}>
+                                        {t.status === 'PAID' || t.status === 'ACTIVE' ? 'ATIVO' : 'PENDENTE'}
+                                    </span>
+                                    <span className="text-[8px] font-mono text-white/10 italic">{t.customer_email || 'S/ E-MAIL'}</span>
+                                </div>
                             </div>
                         ))}
                     </div>

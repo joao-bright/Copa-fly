@@ -57,7 +57,7 @@ export default function RankingPage() {
     const myPos = leaderBoard.findIndex(u => u.me) + 1;
 
     return (
-        <main className="min-h-screen p-4 pb-20 max-w-md mx-auto relative">
+        <main className="min-h-screen p-4 pb-48 max-w-md mx-auto relative">
             <div className="flex items-center gap-4 mb-8 pt-4">
                 <button onClick={() => router.back()} className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all">
                     <ArrowLeft className="w-5 h-5" />

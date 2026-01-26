@@ -442,7 +442,7 @@ export default function Home() {
         <main className="min-h-screen pb-44 flex flex-col relative overflow-x-hidden pt-20">
           <div className="container mx-auto px-4 flex-1 flex flex-col max-w-lg">
             {/* Notice Bar */}
-            <div className="flex-1 flex flex-col items-center justify-center -mt-10">
+            <div className="flex-1 flex flex-col items-center justify-center -mt-10 pb-44">
               <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6 animate-pulse">
                 <Lock className="w-6 h-6 text-red-500" />
               </div>
@@ -543,7 +543,7 @@ export default function Home() {
                 ))}
 
                 {/* Navigation Buttons inside Scroll */}
-                <div className="pt-10 pb-20 w-full max-w-md flex flex-col gap-3">
+                <div className="pt-10 pb-44 w-full max-w-md flex flex-col gap-3">
                   <button
                     onClick={handleNext}
                     disabled={!canAdvance()}
