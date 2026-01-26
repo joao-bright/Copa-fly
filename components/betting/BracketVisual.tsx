@@ -22,13 +22,24 @@ interface BracketVisualProps {
 export default function BracketVisual({ selections, bracket, standingsA, standingsB, matches, ticketIdx }: BracketVisualProps) {
     const [expandedGroup, setExpandedGroup] = useState<'A' | 'B' | null>(null);
 
-    const s1WinnerId = selections['derived_s1'];
-    const s2WinnerId = selections['derived_s2'];
-    const finalWinnerId = selections['derived_f1'];
+    // Resolve IDs: support both derived (simulator) and UUIDs (saved tickets)
+    let s1WinnerId = selections['derived_s1'];
+    let s2WinnerId = selections['derived_s2'];
+    let finalWinnerId = selections['derived_f1'];
 
-    const s1Winner = s1WinnerId === bracket.a1?.id ? bracket.a1 : bracket.b2;
-    const s2Winner = s2WinnerId === bracket.b1?.id ? bracket.b1 : bracket.a2;
-    const champion = finalWinnerId === s1Winner?.id ? s1Winner : s2Winner;
+    if (matches) {
+        const semi1 = matches.find(m => m.phase === 'SEMI' && (m.startTime === '14:00' || (m.teamA?.id === bracket.a1?.id && m.teamB?.id === bracket.b2?.id)));
+        const semi2 = matches.find(m => m.phase === 'SEMI' && (m.startTime === '15:00' || (m.teamA?.id === bracket.b1?.id && m.teamB?.id === bracket.a2?.id)));
+        const finalMatchReal = matches.find(m => m.phase === 'FINAL');
+
+        if (semi1 && selections[semi1.id]) s1WinnerId = selections[semi1.id];
+        if (semi2 && selections[semi2.id]) s2WinnerId = selections[semi2.id];
+        if (finalMatchReal && selections[finalMatchReal.id]) finalWinnerId = selections[finalMatchReal.id];
+    }
+
+    const s1Winner = s1WinnerId ? (s1WinnerId === bracket.a1?.id ? bracket.a1 : bracket.b2) : null;
+    const s2Winner = s2WinnerId ? (s2WinnerId === bracket.b1?.id ? bracket.b1 : bracket.a2) : null;
+    const champion = finalWinnerId ? (finalWinnerId === s1Winner?.id ? s1Winner : s2Winner) : null;
 
     return (
         <div className="w-full glass-panel rounded-[3rem] p-6 sm:p-8 border border-white/10 shadow-3xl relative overflow-hidden bg-black/40">

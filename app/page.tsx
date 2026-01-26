@@ -219,8 +219,8 @@ export default function Home() {
     const sel = selections[activeTicketIdx];
     const s1WinnerId = sel['derived_s1'];
     const s2WinnerId = sel['derived_s2'];
-    const s1Winner = semiMatches[0].teamA?.id === s1WinnerId ? semiMatches[0].teamA : semiMatches[0].teamB;
-    const s2Winner = semiMatches[1].teamA?.id === s2WinnerId ? semiMatches[1].teamA : semiMatches[1].teamB;
+    const s1Winner = s1WinnerId ? (semiMatches[0].teamA?.id === s1WinnerId ? semiMatches[0].teamA : semiMatches[0].teamB) : null;
+    const s2Winner = s2WinnerId ? (semiMatches[1].teamA?.id === s2WinnerId ? semiMatches[1].teamA : semiMatches[1].teamB) : null;
 
     return {
       id: 'derived_f1',
