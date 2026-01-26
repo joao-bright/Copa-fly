@@ -49,9 +49,6 @@ export default function LoginPage() {
 
     return (
         <main className="min-h-screen bg-black flex flex-col items-center justify-center p-6 relative overflow-hidden">
-            {/* Background glow */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.03),transparent_70%)]" />
-
             <div className="w-full max-w-sm glass-panel p-10 rounded-[3rem] border border-white/10 relative z-10 animate-in fade-in zoom-in-95 shadow-3xl">
                 <button onClick={() => router.push('/')} className="absolute top-8 left-8 text-white/20 hover:text-white transition-colors">
                     <ArrowLeft className="w-5 h-5" />

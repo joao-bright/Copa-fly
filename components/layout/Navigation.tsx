@@ -27,8 +27,8 @@ export default function Navigation() {
 
     if (!isMounted) return null;
 
-    // Hide navigation in admin views
-    if (pathname.startsWith('/admin')) return null;
+    // Hide navigation in admin, login and home views (to avoid overlap with floating buttons)
+    if (pathname.startsWith('/admin') || pathname === '/login' || pathname === '/') return null;
 
     const navItems = [
         { label: 'Início', href: '/', icon: Home },

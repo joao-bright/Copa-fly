@@ -535,7 +535,7 @@ export default function Home() {
             <div className="flex gap-4 flex-1 h-full relative">
               {/* Left Column (Matches) */}
               <div className={cn(
-                "overflow-y-auto overflow-x-hidden space-y-4 pb-24 scrollbar-hide duration-700 ease-in-out transition-all px-1",
+                "overflow-y-auto overflow-x-hidden space-y-4 pb-48 scrollbar-hide duration-700 ease-in-out transition-all px-1",
                 showSimulator ? "flex-[0.45] scale-100" : "flex-1 scale-100 flex flex-col items-center"
               )}>
                 {(step === 'SEMIS' ? semiMatches : step === 'FINAL' ? [finalMatch] : currentMatches).map((match: Match) => (
@@ -552,7 +552,7 @@ export default function Home() {
 
               {/* Right Column (Simulator) */}
               <div className={cn(
-                "overflow-y-auto overflow-x-hidden pb-24 scrollbar-hide transition-all duration-700 ease-in-out h-full",
+                "overflow-y-auto overflow-x-hidden pb-48 scrollbar-hide transition-all duration-700 ease-in-out h-full",
                 showSimulator ? "flex-[0.55] opacity-100 translate-x-0" : "flex-[0] opacity-0 translate-x-32 pointer-events-none"
               )}>
                 {showSimulator && (
