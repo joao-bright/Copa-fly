@@ -207,11 +207,7 @@ export default function Home() {
     else if (step === 'GROUP_3') setStep('SEMIS');
     else if (step === 'SEMIS') setStep('FINAL');
     else if (step === 'FINAL') {
-      if (activeTicketIdx === 0 && ticketsToBuy === 1) setStep('UPSELL');
-      else if (activeTicketIdx === 1 && ticketsToBuy === 2) setStep('UPSELL'); // Offer 3rd ticket
-      else if (activeTicketIdx === 0 && ticketsToBuy === 2) { setActiveTicketIdx(1); setStep('GROUP_1'); }
-      else if (activeTicketIdx === 1 && ticketsToBuy === 3) { setActiveTicketIdx(2); setStep('GROUP_1'); }
-      else if (isLoggedIn) setStep('SUMMARY');
+      if (isLoggedIn) setStep('SUMMARY');
       else setStep('REGISTER');
     }
   };
@@ -494,37 +490,7 @@ export default function Home() {
           <div className="container mx-auto px-4 flex-1 flex flex-col max-w-lg">
             {renderProgress()}
 
-            {ticketsToBuy > 1 && (
-              <div className="flex items-center gap-2 mb-2 px-2 overflow-x-auto scrollbar-hide">
-                <div className={cn(
-                  "px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest italic flex items-center gap-2 whitespace-nowrap",
-                  activeTicketIdx === 0 ? "bg-primary text-black border-primary" : "bg-zinc-900 text-white/20 border-white/5"
-                )}>
-                  {activeTicketIdx === 0 ? <TicketIcon className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5 text-primary" />}
-                  BILHETE 01 {activeTicketIdx > 0 && "CONCLUÍDO"}
-                </div>
-                <div className="w-4 h-[1px] bg-white/5" />
-                <div className={cn(
-                  "px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest italic flex items-center gap-2 whitespace-nowrap",
-                  activeTicketIdx === 1 ? "bg-primary text-black border-primary" : "bg-zinc-900 text-white/20 border-white/5"
-                )}>
-                  {activeTicketIdx === 1 ? <Sparkles className="w-2.5 h-2.5" /> : activeTicketIdx > 1 ? <CheckCircle2 className="w-2.5 h-2.5 text-primary" /> : <TicketIcon className="w-2.5 h-2.5" />}
-                  BILHETE 02 {activeTicketIdx === 1 ? "EM PROGRESSO" : activeTicketIdx > 1 ? "CONCLUÍDO" : ""}
-                </div>
-                {ticketsToBuy === 3 && (
-                  <>
-                    <div className="w-4 h-[1px] bg-white/5" />
-                    <div className={cn(
-                      "px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest italic flex items-center gap-2 whitespace-nowrap",
-                      activeTicketIdx === 2 ? "bg-primary text-black border-primary" : "bg-zinc-900 text-white/20 border-white/5"
-                    )}>
-                      <Zap className="w-2.5 h-2.5" />
-                      BILHETE 03 {activeTicketIdx === 2 && "ULTRA FOCO"}
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+
 
             <div className="mb-8 flex items-center justify-between px-2">
               <div className="flex flex-col text-left">
@@ -696,7 +662,7 @@ export default function Home() {
                 <span className="text-sm font-black italic leading-none">PAGAR E REGISTRAR</span>
               </div>
               <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-3xl font-black tracking-tightest">R$ {ticketsToBuy === 1 ? '0,10' : ticketsToBuy === 2 ? '0,15' : '0,20'}</span>
+                <span className="text-3xl font-black tracking-tightest">R$ 0,10</span>
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
@@ -706,63 +672,7 @@ export default function Home() {
     );
   }
 
-  // --- UPSELL STEP ---
-  if (step === 'UPSELL') {
-    const isUpsell2 = ticketsToBuy === 2;
-    return (
-      <main className="min-h-screen flex items-center justify-center p-6 bg-black relative overflow-hidden">
-        <div className="absolute inset-x-0 top-0 h-96 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.08),transparent_70%)] pointer-events-none" />
-        <div className="w-full max-w-sm glass-panel p-10 rounded-[2.5rem] border border-white/10 z-10 text-center animate-in zoom-in-95 shadow-[0_40px_100px_rgba(0,0,0,0.8)] transition-all relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
-          <button
-            onClick={() => handleBack()}
-            className="absolute top-6 left-6 w-10 h-10 rounded-full border border-white/5 flex items-center justify-center text-white/20 hover:text-white transition-all bg-black/40"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-
-          <Trophy className={cn("w-16 h-16 text-primary mx-auto mb-8 animate-bounce mt-4 drop-shadow-[0_0_20px_rgba(250,204,21,0.4)]", isUpsell2 && "text-amber-400")} />
-          <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-[0.85] mb-4">
-            {isUpsell2 ? "CHANCE" : "SORTE EM"}<br />
-            <span className="text-primary not-italic">{isUpsell2 ? "TRIPLA!" : "DOBRO?"}</span>
-          </h2>
-          <p className="text-white/40 text-[10px] uppercase font-black tracking-[0.2em] mb-12 px-4 leading-relaxed italic">
-            {isUpsell2
-              ? "ADICIONE O 3º BILHETE POR APENAS R$ 0,05 E DOMINE O RANKING!"
-              : "ADICIONE O 2º BILHETE COM 50% DESC E TENHA 2X MAIS CHANCES!"}
-          </p>
-
-          <div className="space-y-6">
-            <button
-              onClick={() => {
-                if (isUpsell2) {
-                  setTicketsToBuy(3); setActiveTicketIdx(2); setStep('GROUP_1');
-                } else {
-                  setTicketsToBuy(2); setActiveTicketIdx(1); setStep('GROUP_1');
-                }
-              }}
-              className="w-full bg-primary text-black font-black italic uppercase py-6 rounded-2xl shadow-[0_15px_40px_rgba(250,204,21,0.3)] text-xl flex items-center justify-center gap-3 active:scale-95 transition-all group"
-            >
-              QUERO {isUpsell2 ? '3' : '2'} BILHETES <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-            </button>
-
-            <div className="relative flex items-center justify-center">
-              <div className="absolute w-full h-[1px] bg-white/5" />
-              <span className="relative bg-[#0a0a0a] px-4 text-[8px] font-black text-white/10 uppercase tracking-[0.4em] italic leading-none">OU</span>
-            </div>
-
-            <button
-              onClick={() => { if (isLoggedIn) setStep('SUMMARY'); else setStep('REGISTER'); }}
-              className="w-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/40 hover:text-white font-black uppercase py-4 rounded-xl text-[10px] tracking-widest transition-all italic active:scale-95"
-            >
-              SEGUIR COM {ticketsToBuy} {ticketsToBuy === 1 ? 'BILHETE' : 'BILHETES'}
-            </button>
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   // --- REGISTER STEP ---
   if (step === 'REGISTER') {

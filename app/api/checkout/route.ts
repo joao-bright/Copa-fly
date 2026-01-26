@@ -61,11 +61,18 @@ export async function POST(req: Request) {
                     name: customerName,
                     email: customerEmail,
                     type: 'individual',
-                    document: cpf.replace(/\D/g, '') // Clean CPF
+                    document: cpf.replace(/\D/g, ''), // Clean CPF
+                    phones: {
+                        mobile_phone: {
+                            country_code: '55',
+                            area_code: '11',
+                            number: '999999999'
+                        }
+                    }
                 },
                 items: [
                     {
-                        amount: amount * 100, // Converts to cents
+                        amount: Math.round(amount * 100), // Converts to cents (ensure integer)
                         description: `Copa Fly - Bilhete ${ticket.id.slice(0, 8)}`,
                         quantity: 1
                     }
