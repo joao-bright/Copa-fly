@@ -97,7 +97,7 @@ export default function AdminTicketsPage() {
                                 filteredTickets.map((t) => {
                                     const currentHits = t.bets?.reduce((acc: number, b: any) => {
                                         const m = matches.find(match => match.id === b.match_id);
-                                        if (m && m.winnerId && m.winnerId === b.selected_team_id) return acc + 1;
+                                        if (m && m.winner_id && m.winner_id === b.selected_team_id) return acc + 1;
                                         return acc;
                                     }, 0) || 0;
 

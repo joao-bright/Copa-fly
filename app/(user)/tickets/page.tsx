@@ -117,47 +117,57 @@ export default function MyTickets() {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {tickets.map((ticket, idx) => (
-                            <Link
-                                href={`/tickets/${ticket.id}`}
-                                key={ticket.id}
-                                className="block glass-panel p-6 rounded-[2.5rem] border border-white/10 relative overflow-hidden group shadow-2xl transition-all hover:border-primary/40 hover:bg-white/[0.02]"
-                            >
-                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] -rotate-12 group-hover:rotate-0 transition-transform duration-700">
-                                    <Trophy className="w-24 h-24 text-white" />
-                                </div>
+                        {tickets.map((ticket, idx) => {
+                            const currentHits = ticket.bets?.reduce((acc: number, b: any) => {
+                                const m = matches.find(match => match.id === b.matchId);
+                                if (m && m.winnerId && m.winnerId === b.selectedTeamId) return acc + 1;
+                                return acc;
+                            }, 0) || 0;
 
-                                <div className="relative z-10">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shadow-[0_0_20px_rgba(250,204,21,0.1)]">
-                                                <TicketIcon className="w-6 h-6 text-primary" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-black text-white/40 uppercase italic tracking-widest leading-none mb-1">ID: {ticket.id.slice(0, 8)}</span>
-                                                <h4 className="text-white font-black text-xl italic tracking-tighter uppercase">Bilhete 0{idx + 1}</h4>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col items-end gap-1">
-                                            <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.3em] leading-none">STATUS</span>
-                                            <span className="text-[10px] font-black text-primary italic uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/20">0/15 acertos</span>
-                                        </div>
+                            return (
+                                <Link
+                                    href={`/tickets/${ticket.id}`}
+                                    key={ticket.id}
+                                    className="block glass-panel p-6 rounded-[2.5rem] border border-white/10 relative overflow-hidden group shadow-2xl transition-all hover:border-primary/40 hover:bg-white/[0.02]"
+                                >
+                                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] -rotate-12 group-hover:rotate-0 transition-transform duration-700">
+                                        <Trophy className="w-24 h-24 text-white" />
                                     </div>
 
-                                    <div className="flex items-center justify-between pt-6 border-t border-white/5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex items-center gap-1.5 bg-zinc-900/50 px-3 py-1.5 rounded-xl border border-white/5">
-                                                <Star className="w-3 h-3 text-primary" />
-                                                <span className="text-[9px] font-black text-white/60 uppercase italic tracking-widest">Resultado Aguardando</span>
+                                    <div className="relative z-10">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shadow-[0_0_20px_rgba(250,204,21,0.1)]">
+                                                    <TicketIcon className="w-6 h-6 text-primary" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] font-black text-white/40 uppercase italic tracking-widest leading-none mb-1">ID: {ticket.id.slice(0, 8)}</span>
+                                                    <h4 className="text-white font-black text-xl italic tracking-tighter uppercase">Bilhete 0{idx + 1}</h4>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1">
+                                                <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.3em] leading-none">STATUS</span>
+                                                <span className="text-[10px] font-black text-primary italic uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/20">{currentHits}/15 acertos</span>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-                                            VER DETALHES <ChevronRight className="w-4 h-4" />
+
+                                        <div className="flex items-center justify-between pt-6 border-t border-white/5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-1.5 bg-zinc-900/50 px-3 py-1.5 rounded-xl border border-white/5">
+                                                    <Star className="w-3 h-3 text-primary" />
+                                                    <span className="text-[9px] font-black text-white/60 uppercase italic tracking-widest">
+                                                        {currentHits > 0 ? 'Palpites Certos' : 'Resultado Aguardando'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+                                                VER DETALHES <ChevronRight className="w-4 h-4" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Link>
-                        ))}
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
             </div>

@@ -198,11 +198,30 @@ export default function TicketDetails() {
                 <div className="text-center mb-6">
                     <Trophy className="w-12 h-12 text-primary mx-auto mb-4 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
                     <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">DETALHES DO BILHETE</h1>
-                    <div className="mt-4 flex flex-col items-center gap-2">
-                        <div className="text-[8px] text-white/20 font-black uppercase tracking-[0.3em] flex items-center gap-2 leading-none">
-                            <Calendar className="w-3 h-3" /> {new Date(ticket.createdAt).toLocaleDateString('pt-BR')}
+
+                    <div className="mt-6 flex flex-col items-center gap-4">
+                        <div className="flex items-center gap-6">
+                            <div className="flex flex-col items-center gap-1">
+                                <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.3em] leading-none">STATUS ATUAL</span>
+                                <div className="text-primary font-black italic uppercase tracking-tighter bg-primary/10 px-5 py-2 rounded-2xl border border-primary/20 shadow-[0_0_20px_rgba(250,204,21,0.1)]">
+                                    <span className="text-2xl leading-none">
+                                        {ticket.bets.reduce((acc, b) => {
+                                            const m = matches.find(match => match.id === b.matchId);
+                                            if (m && m.winnerId && m.winnerId === b.selectedTeamId) return acc + 1;
+                                            return acc;
+                                        }, 0)}
+                                    </span>
+                                    <span className="text-xs opacity-40 ml-1">/15 ACERTOS</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="text-[10px] text-primary font-black uppercase tracking-[0.2em] italic mt-2 opacity-40">ID: {ticket.id.slice(0, 8)}</div>
+
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="text-[8px] text-white/20 font-black uppercase tracking-[0.3em] flex items-center gap-2 leading-none">
+                                <Calendar className="w-3 h-3" /> {new Date(ticket.createdAt).toLocaleDateString('pt-BR')}
+                            </div>
+                            <div className="text-[10px] text-primary font-black uppercase tracking-[0.2em] italic mt-1 opacity-40">ID: {ticket.id.slice(0, 8)}</div>
+                        </div>
                     </div>
                 </div>
 
