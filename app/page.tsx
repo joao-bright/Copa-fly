@@ -9,7 +9,7 @@ import BracketVisual from '@/components/betting/BracketVisual';
 import { Match, Team } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { ArrowRight, ArrowLeft, Trophy, CheckCircle2, LogIn, LogOut, LayoutDashboard, ChevronLeft, ChevronRight, Sparkles, X, Star, ShieldCheck, Copy, Check, PlusCircle, Ticket as TicketIcon, User, Mail, Lock, Calendar, Zap, Calculator, Radio, Play } from 'lucide-react';
-import { cn, formatCPF, validateCPF } from '@/lib/utils';
+import { cn, formatCPF, validateCPF, formatPhone } from '@/lib/utils';
 
 type FlowStep = 'GROUP_1' | 'GROUP_2' | 'GROUP_3' | 'SEMIS' | 'FINAL' | 'UPSELL' | 'REGISTER' | 'SUMMARY' | 'PAYMENT' | 'SUCCESS';
 
@@ -727,7 +727,14 @@ export default function Home() {
 
             <div className="space-y-1.5">
               <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">Telefone (WhatsApp)</label>
-              <input type="tel" placeholder="(11) 99999-9999" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.1em] text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.phone} onChange={(e) => setRegData({ ...regData, phone: e.target.value })} />
+              <input
+                type="tel"
+                placeholder="(11) 99999-9999"
+                className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.1em] text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10"
+                value={regData.phone}
+                onChange={(e) => setRegData({ ...regData, phone: formatPhone(e.target.value) })}
+                maxLength={15}
+              />
             </div>
 
             <div className="space-y-1.5">

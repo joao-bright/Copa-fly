@@ -19,3 +19,10 @@ export function validateCPF(cpf: string) {
     const clean = cpf.replace(/\D/g, '');
     return clean.length === 11;
 }
+export function formatPhone(value: string) {
+    return value
+        .replace(/\D/g, '')
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{5})(\d)/, '$1-$2')
+        .replace(/(-\d{4})\d+?$/, '$1');
+}

@@ -32,7 +32,8 @@ export async function POST(req: Request) {
                 cpf,
                 customer_name: customerName,
                 customer_email: customerEmail,
-                password, // Save the password for future login
+                customer_phone: customerPhone,
+                password,
                 status: 'PENDING',
                 total_price: amount
             }])
