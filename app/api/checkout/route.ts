@@ -50,54 +50,63 @@ export async function POST(req: Request) {
         await supabase.from('bets').insert(betsToInsert);
 
         // 3. Pagarme V5 Order Generation (PIX)
+        const genericAddress = {
+            line_1: 'Avenida Paulista, 1000',
+            zip_code: '01311000',
+            city: 'São Paulo',
+            state: 'SP',
+            country: 'BR'
+        };
+
+        const payload = {
+            customer: {
+                name: customerName,
+                email: customerEmail,
+                type: 'individual',
+                document: cpf.replace(/\D/g, ''), // Clean CPF
+                address: genericAddress, // Added to customer object for extra validation safety
+                phones: {
+                    mobile_phone: {
+                        country_code: '55',
+                        area_code: customerPhone ? customerPhone.replace(/\D/g, '').slice(0, 2) : '11',
+                        number: customerPhone ? customerPhone.replace(/\D/g, '').slice(2) : '999999999'
+                    }
+                }
+            },
+            items: [
+                {
+                    amount: Math.round(amount * 100), // Converts to cents (ensure integer)
+                    description: `Copa Fly - Bilhete ${ticket.id.slice(0, 8)}`,
+                    quantity: 1
+                }
+            ],
+            shipping: {
+                address: genericAddress
+            },
+            payments: [
+                {
+                    payment_method: 'pix',
+                    pix: {
+                        expires_in: 3600 // 1 hour
+                    }
+                }
+            ]
+        };
+
+        console.log('Sending request to Pagarme:', JSON.stringify(payload, null, 2));
+
         const pagarmeResponse = await fetch('https://api.pagar.me/core/v5/orders', {
             method: 'POST',
             headers: {
                 'Authorization': `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                customer: {
-                    name: customerName,
-                    email: customerEmail,
-                    type: 'individual',
-                    document: cpf.replace(/\D/g, ''), // Clean CPF
-                    phones: {
-                        mobile_phone: {
-                            country_code: '55',
-                            area_code: customerPhone ? customerPhone.replace(/\D/g, '').slice(0, 2) : '11',
-                            number: customerPhone ? customerPhone.replace(/\D/g, '').slice(2) : '999999999'
-                        }
-                    }
-                },
-                items: [
-                    {
-                        amount: Math.round(amount * 100), // Converts to cents (ensure integer)
-                        description: `Copa Fly - Bilhete ${ticket.id.slice(0, 8)}`,
-                        quantity: 1
-                    }
-                ],
-                shipping: {
-                    address: {
-                        line_1: 'Avenida Paulista, 1000',
-                        zip_code: '01311000',
-                        city: 'São Paulo',
-                        state: 'SP',
-                        country: 'BR'
-                    }
-                },
-                payments: [
-                    {
-                        payment_method: 'pix',
-                        pix: {
-                            expires_in: 3600 // 1 hour
-                        }
-                    }
-                ]
-            })
+            body: JSON.stringify(payload)
         });
 
         const pagarmeData = await pagarmeResponse.json();
+        console.log('Pagarme response status:', pagarmeResponse.status);
+        console.log('Pagarme response data:', JSON.stringify(pagarmeData, null, 2));
 
         if (!pagarmeResponse.ok) {
             console.error('Pagarme API Error:', JSON.stringify(pagarmeData, null, 2));
