@@ -19,7 +19,13 @@ export default function AdminTicketsPage() {
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (data) setTickets(data as any);
+            if (data) {
+                const mapped = (data as any[]).map(t => ({
+                    ...t,
+                    createdAt: t.created_at
+                }));
+                setTickets(mapped);
+            }
         };
         fetchData();
 

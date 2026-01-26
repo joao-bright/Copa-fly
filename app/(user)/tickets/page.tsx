@@ -39,7 +39,11 @@ export default function MyTickets() {
                     console.error('Error fetching tickets:', error);
                 }
                 if (data) {
-                    setTickets(data as any);
+                    const mapped = (data as any[]).map(t => ({
+                        ...t,
+                        createdAt: t.created_at
+                    }));
+                    setTickets(mapped);
                 }
                 setIsLoaded(true);
             };

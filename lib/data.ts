@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Match, Team } from './types';
+import { Match, Team, Ticket } from './types';
 
 // Fallback data for safety before DB is populated
 export const MOCK_TEAMS: Team[] = [
