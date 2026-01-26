@@ -26,11 +26,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="dark">
-      <body className={`${inter.variable} ${outfit.variable} font-sans min-h-screen bg-background`}>
-        {/* Overlay for better text readability over background */}
-        <div className="min-h-screen bg-black/80 backdrop-blur-[2px]">
-          {children}
-        </div>
+      <body className={`${inter.variable} ${outfit.variable} font-sans min-h-screen bg-black text-white antialiased`}>
+        {children}
         <Navigation />
       </body>
     </html>

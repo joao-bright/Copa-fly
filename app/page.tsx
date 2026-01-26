@@ -316,42 +316,34 @@ export default function Home() {
   const renderTutorial = () => {
     if (!showTutorial) return null;
     return (
-      <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl animate-in fade-in duration-500">
-        <div className="w-full max-w-sm glass-panel p-10 rounded-[3.5rem] border border-white/10 shadow-3xl relative overflow-hidden text-center animate-in zoom-in-95 duration-500">
+      <div className="fixed inset-0 z-[250] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500 overflow-hidden touch-none h-screen w-screen left-0 top-0">
+        <div className="w-full max-w-sm glass-panel p-10 rounded-[3.5rem] border border-white/10 shadow-3xl relative overflow-hidden text-center animate-in zoom-in-95 duration-500 max-h-[90vh] flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
-          <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-primary/20 rotate-6 shadow-[0_0_30px_rgba(250,204,21,0.1)]">
-            <Sparkles className="w-10 h-10 text-primary" />
+          <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-primary/20 rotate-6 shadow-[0_0_30px_rgba(250,204,21,0.1)] flex-shrink-0">
+            <Sparkles className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none mb-6">COMO <br /> <span className="text-primary not-italic font-sans">FUNCIONA?</span></h2>
-          <div className="space-y-6 text-left mb-10">
-            <div className="flex gap-4">
-              <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/40 flex-shrink-0 flex items-center justify-center text-[10px] font-black text-primary">1</div>
-              <div>
-                <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">DÊ SEUS PALPITES</h3>
-                <p className="text-[8px] text-white/30 font-black uppercase leading-tight italic">Escolha os vencedores de cada rodada até a grande final.</p>
+          <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none mb-6">COMO <br /> <span className="text-primary not-italic font-sans text-2xl">FUNCIONA?</span></h2>
+          <div className="space-y-5 text-left mb-8 overflow-y-auto pr-2 scrollbar-hide">
+            {[
+              { n: 1, t: 'DÊ SEUS PALPITES', d: 'Escolha os vencedores de cada rodada até a grande final.' },
+              { n: 2, t: 'PAGUE O BILHETE', d: 'Realize o pagamento via Pix para validar seu palpite oficialmente.' },
+              { n: 3, t: 'CONCORRA AO PRÊMIO', d: 'Acompanhe os resultados e lute pelo acumulado da Copa Fly!' }
+            ].map((s, i) => (
+              <div key={i} className="flex gap-4">
+                <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/40 flex-shrink-0 flex items-center justify-center text-[10px] font-black text-primary">{s.n}</div>
+                <div>
+                  <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">{s.t}</h3>
+                  <p className="text-[8px] text-white/30 font-black uppercase leading-tight italic">{s.d}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/40 flex-shrink-0 flex items-center justify-center text-[10px] font-black text-primary">2</div>
-              <div>
-                <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">PAGUE O BILHETE</h3>
-                <p className="text-[8px] text-white/30 font-black uppercase leading-tight italic">Realize o pagamento via Pix para validar seu palpite oficialmente.</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/40 flex-shrink-0 flex items-center justify-center text-[10px] font-black text-primary">3</div>
-              <div>
-                <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">CONCORRA AO PRÊMIO</h3>
-                <p className="text-[8px] text-white/30 font-black uppercase leading-tight italic">Acompanhe os resultados e lute pelo acumulado da Copa Fly!</p>
-              </div>
-            </div>
+            ))}
           </div>
           <button
             onClick={() => {
               localStorage.setItem('copa_tutorial_seen', 'true');
               setShowTutorial(false);
             }}
-            className="w-full bg-primary text-black font-black uppercase py-5 rounded-3xl shadow-xl flex items-center justify-center gap-2 italic tracking-widest active:scale-95 transition-all text-xs"
+            className="w-full bg-primary text-black font-black uppercase py-5 rounded-3xl shadow-xl flex items-center justify-center gap-2 italic tracking-widest active:scale-95 transition-all text-xs flex-shrink-0"
           >
             COMEÇAR AGORA <ArrowRight className="w-4 h-4" />
           </button>
@@ -799,12 +791,12 @@ export default function Home() {
 
   // --- FINAL RENDER ---
   return (
-    <div className={cn("min-h-screen bg-black overflow-x-hidden relative", hasExistingTicket && step !== 'SUCCESS' && "overflow-hidden")}>
+    <div className={cn("min-h-screen bg-black overflow-x-hidden relative", (hasExistingTicket || showTutorial) && step !== 'SUCCESS' && "overflow-hidden h-screen")}>
       {content}
 
       {/* Trava de Bilhete Único Overlay */}
       {hasExistingTicket && step !== 'SUCCESS' && (
-        <div className="fixed inset-0 z-[150] backdrop-blur-md bg-black/60 flex items-center justify-center p-6 animate-in fade-in duration-500">
+        <div className="fixed inset-0 z-[200] backdrop-blur-md bg-black/90 flex items-center justify-center p-6 animate-in fade-in duration-500 h-screen w-screen left-0 top-0">
           <div className="glass-panel p-8 rounded-[2.5rem] border border-white/10 shadow-3xl text-center max-w-sm">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/20 rotate-12"><ShieldCheck className="w-8 h-8 text-primary" /></div>
             <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase mb-2">BILHETE JÁ REGISTRADO</h2>
