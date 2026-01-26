@@ -82,7 +82,7 @@ export async function POST(req: Request) {
                 }
             ],
             shipping: {
-                description: `Envio do Bilhete Copa Fly`, // Added required description field
+                description: `Copa Fly - Bilhete ${ticket.id.slice(0, 8)}`,
                 address: genericAddress
             },
             payments: [

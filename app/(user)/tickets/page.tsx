@@ -50,7 +50,8 @@ export default function MyTickets() {
             };
             fetchData();
         } else {
-            router.push('/login');
+            // Em vez de crashar ou redirecionar, apenas marca como carregado
+            // A UI já lida com tickets.length === 0
             setIsLoaded(true);
         }
     }, [router]);
@@ -105,9 +106,14 @@ export default function MyTickets() {
                         <p className="text-white/20 text-[10px] uppercase font-black tracking-widest leading-loose mb-10">
                             Você ainda não registrou nenhum palpite nesta copa.
                         </p>
-                        <button onClick={() => router.push('/')} className="w-full bg-primary text-black font-black uppercase py-5 rounded-3xl shadow-xl flex items-center justify-center gap-2 italic tracking-widest active:scale-95 transition-all">
+                        <button onClick={() => router.push('/')} className="w-full bg-primary text-black font-black uppercase py-5 rounded-3xl shadow-xl flex items-center justify-center gap-2 italic tracking-widest active:scale-95 transition-all mb-4">
                             CRIAR BILHETE <PlusCircle className="w-5 h-5" />
                         </button>
+                        {!cpf && (
+                            <button onClick={() => router.push('/login')} className="w-full bg-white/5 text-white/40 font-black uppercase py-4 rounded-3xl border border-white/10 flex items-center justify-center gap-2 italic tracking-widest active:scale-95 transition-all">
+                                FAZER LOGIN
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="space-y-6">

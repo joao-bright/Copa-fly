@@ -1,125 +1,45 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Trophy, Clock, ShieldCheck, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { getMatches } from '@/lib/data';
-import { ArrowLeft, Trophy } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export default function RankingPage() {
     const router = useRouter();
-    const [leaderBoard, setLeaderBoard] = useState<{ name: string, cpf: string, points: number, me: boolean }[]>([]);
-    const [userCpf, setUserCpf] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const storedCpf = localStorage.getItem('copa_user_cpf');
-        setUserCpf(storedCpf);
-
-        const fetchData = async () => {
-            const matches = await getMatches();
-            const { data: tickets } = await supabase.from('tickets').select('*, bets(*)');
-
-            if (!tickets) return;
-
-            const winnersMap: Record<string, string> = {};
-            matches.forEach(m => { if (m.winnerId) winnersMap[m.id] = m.winnerId; });
-
-            const scores: Record<string, { points: number, name: string }> = {};
-            tickets.forEach(t => {
-                if (!scores[t.cpf]) scores[t.cpf] = { points: 0, name: t.customer_name || 'Usuário Fly' };
-                t.bets.forEach((b: any) => {
-                    if (winnersMap[b.match_id] === b.selected_team_id) {
-                        scores[t.cpf].points += 1;
-                    }
-                });
-            });
-
-            const board = Object.entries(scores)
-                .map(([cpf, data]) => ({
-                    name: data.name,
-                    cpf: cpf.substring(0, 3) + '.***.***-' + cpf.substring(cpf.length - 2),
-                    fullCpf: cpf,
-                    points: data.points,
-                    me: cpf === storedCpf
-                }))
-                .sort((a, b) => b.points - a.points)
-                .slice(0, 20);
-
-            setLeaderBoard(board as any);
-            setLoading(false);
-        };
-
-        fetchData();
-    }, []);
-
-    const myPos = leaderBoard.findIndex(u => u.me) + 1;
 
     return (
-        <main className="min-h-screen p-4 pb-48 max-w-md mx-auto relative">
-            <div className="flex items-center gap-4 mb-8 pt-4">
-                <button onClick={() => router.back()} className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all">
-                    <ArrowLeft className="w-5 h-5" />
+        <main className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.05),transparent_70%)]">
+            <div className="absolute top-10 left-10 opacity-10 blur-2xl w-64 h-64 bg-primary rounded-full animate-pulse" />
+            <div className="absolute bottom-10 right-10 opacity-5 blur-3xl w-80 h-80 bg-primary rounded-full" />
+
+            <div className="glass-panel p-10 rounded-[3.5rem] w-full max-w-sm border border-white/10 shadow-3xl text-center relative overflow-hidden animate-in zoom-in-95 backdrop-blur-2xl">
+                <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-primary/20 rotate-12 shadow-[0_0_30px_rgba(250,204,21,0.1)]">
+                    <Trophy className="w-10 h-10 text-primary animate-bounce" />
+                </div>
+
+                <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none mb-4">RANKING <br /> <span className="text-primary not-italic font-sans">COPA FLY</span></h2>
+                <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20 mb-8">
+                    <Clock className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[10px] font-black text-primary uppercase tracking-widest italic">Disponível em breve</span>
+                </div>
+
+                <p className="text-white/30 text-[10px] uppercase font-black tracking-[0.2em] leading-relaxed mb-10">
+                    O ranking oficial será liberado <br /> após o encerramento do campeonato <br /> e processamento de todos os resultados.
+                </p>
+
+                <button
+                    onClick={() => router.push('/')}
+                    className="w-full bg-white text-black font-black uppercase py-5 rounded-3xl shadow-xl flex items-center justify-center gap-2 italic tracking-widest active:scale-95 transition-all"
+                >
+                    VOLTAR AO INÍCIO
                 </button>
-                <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-outfit)]">Ranking Top 10</h1>
             </div>
 
-            <div className="glass-panel rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative">
-                <div className="bg-primary/20 p-6 flex items-center justify-between border-b border-primary/20">
-                    <div className="flex items-center gap-3">
-                        <Trophy className="text-primary w-8 h-8" />
-                        <div>
-                            <h3 className="text-primary font-black uppercase text-sm italic">Líderes da Copa</h3>
-                            <p className="text-primary/60 text-[10px] uppercase font-bold tracking-widest">Atualizado em tempo real</p>
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <span className="block text-2xl font-black text-white italic">#{myPos > 0 ? myPos.toString().padStart(2, '0') : '--'}</span>
-                        <span className="text-[8px] text-white/40 uppercase font-black">Sua Posição</span>
-                    </div>
-                </div>
-
-                <div className="divide-y divide-white/5">
-                    {leaderBoard.map((user, index) => (
-                        <div
-                            key={index}
-                            className={cn(
-                                "p-5 flex items-center justify-between transition-colors",
-                                user.me ? "bg-white/10" : "hover:bg-white/5"
-                            )}
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center font-black italic text-sm border",
-                                    index === 0 ? "bg-yellow-500 border-yellow-400 text-black scale-110 shadow-[0_0_15px_rgba(234,179,8,0.5)]" :
-                                        index === 1 ? "bg-slate-300 border-white text-black" :
-                                            index === 2 ? "bg-amber-700 border-amber-600 text-white" :
-                                                "bg-black/50 border-white/10 text-white/40"
-                                )}>
-                                    {index + 1}
-                                </div>
-                                <div>
-                                    <span className="text-sm font-bold uppercase italic text-white/40">
-                                        Palpiteiro #{index + 1}
-                                    </span>
-                                    <span className="block text-[8px] text-primary font-black tracking-widest">{user.cpf}</span>
-                                    {user.me && <span className="text-[8px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase font-black">Você</span>}
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <span className="text-lg font-black italic text-white">{user.points}</span>
-                                <span className="text-[10px] text-white/30 uppercase font-bold tracking-tighter mt-1">Acertos</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <p className="mt-8 text-[10px] text-white/20 text-center uppercase font-bold tracking-widest leading-relaxed">
-                * Em caso de empate, o prêmio final será dividido igualmente entre os primeiros colocados.
-            </p>
+            <style jsx>{`
+                .glass-panel {
+                    background: rgba(10, 10, 10, 0.4);
+                    backdrop-filter: blur(20px);
+                }
+             `}</style>
         </main>
     );
 }

@@ -63,6 +63,31 @@ export default function Home() {
   const [guessesLocked, setGuessesLocked] = useState(false);
   const [userGuesses, setUserGuesses] = useState<Record<string, string> | null>(null);
 
+  // Persistence: Save state on change
+  useEffect(() => {
+    if (step !== 'SUCCESS' && step !== 'PAYMENT') {
+      localStorage.setItem('copa_step', step);
+    }
+    localStorage.setItem('copa_selections', JSON.stringify(selections));
+  }, [step, selections]);
+
+  // Persistence: Load on mount
+  useEffect(() => {
+    const savedStep = localStorage.getItem('copa_step');
+    const savedSelections = localStorage.getItem('copa_selections');
+
+    if (savedStep && ['GROUP_1', 'GROUP_2', 'GROUP_3', 'SEMIS', 'FINAL', 'REGISTER', 'SUMMARY'].includes(savedStep)) {
+      setStep(savedStep as FlowStep);
+    }
+    if (savedSelections) {
+      try {
+        setSelections(JSON.parse(savedSelections));
+      } catch (e) {
+        console.error('Error loading selections', e);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (step === 'PAYMENT' || step === 'SUCCESS' || step === 'REGISTER' || step === 'SUMMARY') {
       document.body.classList.add('hide-nav');
@@ -717,12 +742,12 @@ export default function Home() {
           <form onSubmit={handleRegSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">Nome Completo</label>
-              <input type="text" placeholder="JOÃO SILVA" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-[10px] outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.name} onChange={(e) => setRegData({ ...regData, name: e.target.value })} />
+              <input type="text" placeholder="JOÃO SILVA" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.name} onChange={(e) => setRegData({ ...regData, name: e.target.value })} />
             </div>
 
             <div className="space-y-1.5">
               <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">CPF</label>
-              <input type="text" placeholder="000.000.000-00" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.2em] text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.cpf} onChange={(e) => setRegData({ ...regData, cpf: formatCPF(e.target.value) })} maxLength={14} />
+              <input type="text" placeholder="000.000.000-00" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.2em] text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.cpf} onChange={(e) => setRegData({ ...regData, cpf: formatCPF(e.target.value) })} maxLength={14} />
             </div>
 
             <div className="space-y-1.5">
@@ -730,7 +755,7 @@ export default function Home() {
               <input
                 type="tel"
                 placeholder="(11) 99999-9999"
-                className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.1em] text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10"
+                className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.1em] text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10"
                 value={regData.phone}
                 onChange={(e) => setRegData({ ...regData, phone: formatPhone(e.target.value) })}
                 maxLength={15}
@@ -739,12 +764,12 @@ export default function Home() {
 
             <div className="space-y-1.5">
               <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">E-mail</label>
-              <input type="email" placeholder="seu@email.com" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-[10px] outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.email} onChange={(e) => setRegData({ ...regData, email: e.target.value })} />
+              <input type="email" placeholder="seu@email.com" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.email} onChange={(e) => setRegData({ ...regData, email: e.target.value })} />
             </div>
 
             <div className="space-y-1.5">
               <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">Senha</label>
-              <input type="password" placeholder="******" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black text-sm outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.password} onChange={(e) => setRegData({ ...regData, password: e.target.value })} />
+              <input type="password" placeholder="******" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.password} onChange={(e) => setRegData({ ...regData, password: e.target.value })} />
             </div>
 
             {regError && <p className="text-red-500 text-[9px] font-black uppercase text-center bg-red-500/10 py-2 rounded-lg border border-red-500/20">{regError}</p>}
@@ -831,26 +856,20 @@ export default function Home() {
 
           <button
             onClick={async () => {
-              for (let i = 0; i < ticketsToBuy; i++) {
-                const sel = selections[i];
-                const standingsA = calculateStandings('A', i);
-                const standingsB = calculateStandings('B', i);
-                await saveTicket({
-                  cpf: userCpf,
-                  status: 'PENDING', // Enhanced: mark as pending until webhook confirmation
-                  total_price: finalPrice,
-                  customer_email: regData.email || localStorage.getItem('copa_user_email') || '',
-                  password: regData.password || ''
-                }, [
-                  ...groupMatches.map(m => ({ matchId: m.id, selectedTeamId: sel[m.id] })),
-                  { matchId: 'derived_s1', selectedTeamId: sel['derived_s1'] },
-                  { matchId: 'derived_s2', selectedTeamId: sel['derived_s2'] },
-                  { matchId: 'derived_f1', selectedTeamId: sel['derived_f1'] }
-                ]);
-              }
-              setStep('SUCCESS'); window.scrollTo(0, 0);
+              // Limpar persistência do quiz ao pagar
+              const clearPersistence = () => {
+                localStorage.removeItem('copa_step');
+                localStorage.setItem('copa_selections', JSON.stringify([{}, {}, {}]));
+              };
+
+              // Feedback para o usuário conforme áudio
+              alert('O Pix demora no máximo 1 minuto para ser processado. Clique em OK para carregar o bilhete ativo!');
+
+              clearPersistence();
+              setStep('SUCCESS');
+              window.scrollTo(0, 0);
             }}
-            className="w-full bg-primary text-black font-black uppercase py-6 rounded-[2rem] shadow-[0_20px_60px_rgba(250,204,21,0.4)] text-2xl italic active:scale-95 transition-all relative z-[110]"
+            className="w-full bg-primary text-black font-black uppercase py-6 rounded-[2rem] shadow-[0_20px_60px_rgba(250,204,21,0.4)] text-base sm:text-2xl italic active:scale-95 transition-all relative z-[110]"
           >
             JÁ PAGUEI!
           </button>
