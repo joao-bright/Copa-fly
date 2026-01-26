@@ -63,26 +63,18 @@ export default function MyTickets() {
 
 
     const renderHeader = () => (
-        <header className="fixed top-0 w-full z-[100] glass-panel border-b border-white/10 px-4 py-3 bg-black/95 h-20 shadow-2xl overflow-hidden">
-            <div className="container mx-auto h-full flex items-center justify-between relative max-w-lg">
-                {/* Left: Title */}
-                <div onClick={() => router.push('/')} className="flex flex-col cursor-pointer group z-10">
-                    <span className="text-[8px] text-primary font-black uppercase tracking-[0.1em] leading-none mb-1 italic">Palpites</span>
-                    <h1 className="text-xl font-black text-white italic tracking-tighter leading-none">COPA FLY</h1>
-                </div>
-
-                {/* Center: Logo */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                    <img src="/logo.jpg" alt="Fly Cup" className="w-16 h-16 object-contain rounded-full opacity-100" />
-                </div>
-
-                {/* Right: Action */}
-                <div className="z-10">
-                    <button onClick={handleLogout} className="flex items-center gap-2 bg-zinc-900 border border-white/5 py-2 px-4 rounded-xl text-[10px] font-black uppercase text-red-500/60 hover:text-red-500 transition-all active:scale-95">
-                        <LogOut className="w-4 h-4" /> SAIR
-                    </button>
+        <header className="fixed top-0 w-full z-50 glass-panel border-b border-white/10 px-4 py-3 flex justify-between items-center bg-black/95 h-16">
+            <div onClick={() => router.push('/')} className="flex items-center gap-2 cursor-pointer">
+                <img src="/logo.jpg" alt="Fly Cup" className="w-10 h-10 object-contain rounded-full border border-primary/20" />
+                <div className="flex flex-col">
+                    <span className="text-[9px] text-primary font-black uppercase tracking-[0.2em] leading-none mb-0.5 italic">Palpites</span>
+                    <h1 className="text-lg font-black text-white italic tracking-tighter leading-none">COPA FLY</h1>
                 </div>
             </div>
+
+            <button onClick={handleLogout} className="flex items-center gap-1.5 bg-zinc-900 border border-white/5 py-1.5 px-3 rounded-full text-[9px] font-black uppercase text-red-500/60 hover:text-red-500 transition-all active:scale-95">
+                <LogOut className="w-3 h-3" /> Sair
+            </button>
         </header>
     );
 

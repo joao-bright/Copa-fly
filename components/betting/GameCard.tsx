@@ -42,26 +42,26 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
                                 )}
                             >
                                 <div className={cn(
-                                    "w-14 h-11 rounded-lg flex items-center justify-center border transition-all overflow-hidden bg-black flex-shrink-0 shadow-inner",
+                                    "w-8 h-6 rounded flex items-center justify-center border transition-all overflow-hidden bg-black flex-shrink-0 shadow-inner",
                                     isSelected ? "border-primary/40" : "border-white/5"
                                 )}>
                                     {team.logoUrl ? (
-                                        <img src={team.logoUrl} className="w-full h-full object-contain p-1" />
+                                        <img src={team.logoUrl} className="w-full h-full object-cover" />
                                     ) : (
-                                        <span className="text-white/10 font-black text-[8px] uppercase italic">{team.name.substring(0, 3)}</span>
+                                        <span className="text-white/10 font-black text-[6px] uppercase italic">{team.name.substring(0, 3)}</span>
                                     )}
                                 </div>
                                 <span className={cn(
-                                    "text-[10px] font-black uppercase tracking-tight italic transition-colors truncate text-left flex-1",
+                                    "text-[8px] font-black uppercase tracking-tight italic transition-colors truncate text-left flex-1",
                                     isSelected ? "text-primary" : "text-white/40 group-hover/team:text-white"
                                 )}>
                                     {team.name}
                                 </span>
                                 <div className={cn(
-                                    "w-5 h-5 rounded-full border flex items-center justify-center transition-all",
+                                    "w-4 h-4 rounded-full border flex items-center justify-center transition-all",
                                     isSelected ? "bg-primary border-primary shadow-[0_0_8px_rgba(250,204,21,0.5)]" : "bg-black/20 border-white/10"
                                 )}>
-                                    {isSelected && <Check className="w-3 h-3 text-black stroke-[4px]" />}
+                                    {isSelected && <Check className="w-2.5 h-2.5 text-black stroke-[4px]" />}
                                 </div>
                             </button>
                         );
@@ -101,27 +101,27 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
                 <button
                     onClick={() => !disabled && onSelect(teamA.id)}
                     className={cn(
-                        "flex-1 flex flex-col items-center gap-8 p-8 rounded-[3rem] border transition-all duration-500 relative overflow-hidden group/team",
+                        "flex-1 flex flex-col items-center gap-6 p-6 rounded-[2.5rem] border transition-all duration-500 relative overflow-hidden group/team",
                         selection === teamA.id
-                            ? "bg-primary/20 border-primary/50 shadow-[0_0_40px_rgba(250,204,21,0.2)] scale-[1.03]"
+                            ? "bg-primary/10 border-primary/50 shadow-[0_0_30px_rgba(250,204,21,0.15)] scale-[1.02]"
                             : "bg-zinc-950/50 border-white/5 hover:border-white/10 hover:bg-white/5",
                         disabled && "opacity-50 cursor-not-allowed"
                     )}
                 >
                     <div className={cn(
-                        "w-full h-28 rounded-3xl flex items-center justify-center border transition-all duration-500 overflow-hidden bg-black/40",
-                        selection === teamA.id ? "border-primary/40 shadow-inner shadow-primary/20" : "border-white/5"
+                        "w-full aspect-[1792/768] rounded-2xl flex items-center justify-center border transition-all duration-500 overflow-hidden bg-black",
+                        selection === teamA.id ? "border-primary/40 shadow-inner shadow-primary/10" : "border-white/5"
                     )}>
                         {teamA.logoUrl ? (
-                            <img src={teamA.logoUrl} className={cn("w-full h-full object-contain p-4 transition-transform duration-700", selection === teamA.id && "scale-110")} />
+                            <img src={teamA.logoUrl} className={cn("w-full h-full object-cover transition-transform duration-700", selection === teamA.id && "scale-110")} />
                         ) : (
-                            <span className="text-white/10 font-black text-xl uppercase italic">{teamA.name.substring(0, 3)}</span>
+                            <span className="text-white/10 font-black text-sm uppercase italic">{teamA.name.substring(0, 3)}</span>
                         )}
                     </div>
 
-                    <div className="flex flex-col items-center gap-6">
+                    <div className="flex flex-col items-center gap-4">
                         <span className={cn(
-                            "text-base font-black uppercase tracking-[0.2em] italic transition-colors text-center px-1 leading-tight",
+                            "text-[12px] font-black uppercase tracking-[0.15em] italic transition-colors text-center px-1 leading-tight",
                             selection === teamA.id ? "text-primary" : "text-white/60 group-hover/team:text-white"
                         )}>
                             {teamA.name}
@@ -129,52 +129,52 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
 
                         {/* Selection Circle */}
                         <div className={cn(
-                            "w-12 h-12 rounded-full border-[3px] flex items-center justify-center transition-all duration-500",
+                            "w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-500",
                             selection === teamA.id
-                                ? "bg-primary border-primary shadow-[0_0_20px_rgba(250,204,21,0.6)] rotate-0"
+                                ? "bg-primary border-primary shadow-[0_0_15px_rgba(250,204,21,0.5)] rotate-0"
                                 : "bg-black/40 border-white/10 group-hover/team:border-white/20 -rotate-90"
                         )}>
                             {selection === teamA.id ? (
-                                <Check className="w-6 h-6 text-black stroke-[5px]" />
+                                <Check className="w-5 h-5 text-black stroke-[4px]" />
                             ) : (
-                                <div className="w-2.5 h-2.5 bg-white/10 rounded-full group-hover/team:bg-white/20" />
+                                <div className="w-2 h-2 bg-white/10 rounded-full group-hover/team:bg-white/20" />
                             )}
                         </div>
                     </div>
                 </button>
 
                 {/* VS Divider */}
-                <div className="flex flex-col items-center justify-center gap-4 py-4">
-                    <div className="h-16 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
-                    <span className="text-2xl font-black text-primary italic tracking-tighter drop-shadow-[0_0_15px_rgba(250,204,21,0.4)] animate-pulse">VS</span>
-                    <div className="h-16 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
+                <div className="flex flex-col items-center justify-center gap-3 py-4">
+                    <div className="h-12 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
+                    <span className="text-lg font-black text-primary italic tracking-tighter drop-shadow-[0_0_10px_rgba(250,204,21,0.3)] animate-pulse">VS</span>
+                    <div className="h-12 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
                 </div>
 
                 {/* Team B */}
                 <button
                     onClick={() => !disabled && onSelect(teamB.id)}
                     className={cn(
-                        "flex-1 flex flex-col items-center gap-8 p-8 rounded-[3rem] border transition-all duration-500 relative overflow-hidden group/team",
+                        "flex-1 flex flex-col items-center gap-6 p-6 rounded-[2.5rem] border transition-all duration-500 relative overflow-hidden group/team",
                         selection === teamB.id
-                            ? "bg-primary/20 border-primary/50 shadow-[0_0_40px_rgba(250,204,21,0.2)] scale-[1.03]"
+                            ? "bg-primary/10 border-primary/50 shadow-[0_0_30px_rgba(250,204,21,0.15)] scale-[1.02]"
                             : "bg-zinc-950/50 border-white/5 hover:border-white/10 hover:bg-white/5",
                         disabled && "opacity-50 cursor-not-allowed"
                     )}
                 >
                     <div className={cn(
-                        "w-full h-28 rounded-3xl flex items-center justify-center border transition-all duration-500 overflow-hidden bg-black/40",
-                        selection === teamB.id ? "border-primary/40 shadow-inner shadow-primary/20" : "border-white/5"
+                        "w-full aspect-[1792/768] rounded-2xl flex items-center justify-center border transition-all duration-500 overflow-hidden bg-black",
+                        selection === teamB.id ? "border-primary/40 shadow-inner shadow-primary/10" : "border-white/5"
                     )}>
                         {teamB.logoUrl ? (
-                            <img src={teamB.logoUrl} className={cn("w-full h-full object-contain p-4 transition-transform duration-700", selection === teamB.id && "scale-110")} />
+                            <img src={teamB.logoUrl} className={cn("w-full h-full object-cover transition-transform duration-700", selection === teamB.id && "scale-110")} />
                         ) : (
-                            <span className="text-white/10 font-black text-xl uppercase italic">{teamB.name.substring(0, 3)}</span>
+                            <span className="text-white/10 font-black text-sm uppercase italic">{teamB.name.substring(0, 3)}</span>
                         )}
                     </div>
 
-                    <div className="flex flex-col items-center gap-6">
+                    <div className="flex flex-col items-center gap-4">
                         <span className={cn(
-                            "text-base font-black uppercase tracking-[0.2em] italic transition-colors text-center px-1 leading-tight",
+                            "text-[12px] font-black uppercase tracking-[0.15em] italic transition-colors text-center px-1 leading-tight",
                             selection === teamB.id ? "text-primary" : "text-white/60 group-hover/team:text-white"
                         )}>
                             {teamB.name}
@@ -182,15 +182,15 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
 
                         {/* Selection Circle */}
                         <div className={cn(
-                            "w-12 h-12 rounded-full border-[3px] flex items-center justify-center transition-all duration-500",
+                            "w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-500",
                             selection === teamB.id
-                                ? "bg-primary border-primary shadow-[0_0_20px_rgba(250,204,21,0.6)] rotate-0"
+                                ? "bg-primary border-primary shadow-[0_0_15px_rgba(250,204,21,0.5)] rotate-0"
                                 : "bg-black/40 border-white/10 group-hover/team:border-white/20 -rotate-90"
                         )}>
                             {selection === teamB.id ? (
-                                <Check className="w-6 h-6 text-black stroke-[5px]" />
+                                <Check className="w-5 h-5 text-black stroke-[4px]" />
                             ) : (
-                                <div className="w-2.5 h-2.5 bg-white/10 rounded-full group-hover/team:bg-white/20" />
+                                <div className="w-2 h-2 bg-white/10 rounded-full group-hover/team:bg-white/20" />
                             )}
                         </div>
                     </div>
