@@ -863,7 +863,7 @@ export default function Home() {
               };
 
               // Feedback para o usuário conforme áudio
-              alert('O Pix demora no máximo 1 minuto para ser processado. Clique em OK para carregar o bilhete ativo!');
+              alert('O Pix demora no máximo 1 minuto para ser processado. Clique em OK para carregar seus bilhetes ativos!');
 
               clearPersistence();
               setStep('SUCCESS');
