@@ -668,7 +668,7 @@ export default function Home() {
                 <span className="text-sm font-black italic leading-none">PAGAR E REGISTRAR</span>
               </div>
               <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-3xl font-black tracking-tightest">R$ 0,10</span>
+                <span className="text-3xl font-black tracking-tightest">R$ 19,90</span>
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
@@ -743,7 +743,7 @@ export default function Home() {
           method: 'POST',
           body: JSON.stringify({
             cpf: userCpf,
-            amount: 0.10, // Fixed R$ 0,10
+            amount: 19.90, // Fixed R$ 19,90
             customerName,
             customerEmail,
             customerPhone: customerPhone.replace(/\D/g, ''),

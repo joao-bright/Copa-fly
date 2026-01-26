@@ -37,6 +37,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'Você já possui um bilhete ativo com este CPF.' }, { status: 400 });
         }
 
+        const fixedAmount = 19.90;
+
         // 1. Create a PENDING ticket in Supabase
         const { data: ticket, error: tError } = await supabase
             .from('tickets')
@@ -47,7 +49,7 @@ export async function POST(req: Request) {
                 customer_phone: customerPhone,
                 password,
                 status: 'PENDING',
-                total_price: amount
+                total_price: fixedAmount
             }])
             .select()
             .single();
@@ -97,7 +99,7 @@ export async function POST(req: Request) {
             },
             items: [
                 {
-                    amount: Math.round(amount * 100), // Converts to cents (ensure integer)
+                    amount: Math.round(fixedAmount * 100), // Converts to cents (ensure integer)
                     description: `Copa Fly - Bilhete ${ticket.id.slice(0, 8)}`,
                     quantity: 1
                 }

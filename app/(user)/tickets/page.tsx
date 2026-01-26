@@ -42,7 +42,11 @@ export default function MyTickets() {
                 if (data) {
                     const mapped = (data as any[]).map(t => ({
                         ...t,
-                        createdAt: t.created_at
+                        createdAt: t.created_at,
+                        bets: (t.bets || []).map((b: any) => ({
+                            matchId: b.match_id,
+                            selectedTeamId: b.selected_team_id
+                        }))
                     }));
                     setTickets(mapped);
                 }
