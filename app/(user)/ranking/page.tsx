@@ -16,8 +16,15 @@ export default function RankingPage() {
                     <Trophy className="w-10 h-10 text-primary animate-bounce" />
                 </div>
 
-                <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none mb-2">RANKING <br /> <span className="text-primary not-italic font-sans">COPA FLY</span></h2>
-                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-4 italic">Valor Acumulado: <span className="text-primary">+ R$ 6.320,00</span></div>
+                <div className="flex flex-col items-center mb-10">
+                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-1 animate-pulse">CONCORRA AO ACUMULADO</span>
+                    <div className="text-5xl font-black text-white italic tracking-tighter drop-shadow-[0_0_20px_rgba(250,204,21,0.4)] transition-all hover:scale-105 duration-500">
+                        R$ <span className="text-primary">6.320,00</span>
+                    </div>
+                </div>
+
+                <h2 className="text-xl font-black text-white/20 italic tracking-tighter uppercase leading-none mb-8 text-center">RANKING COPA FLY</h2>
+
                 <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20 mb-8">
                     <Clock className="w-3.5 h-3.5 text-primary" />
                     <span className="text-[10px] font-black text-primary uppercase tracking-widest italic">Disponível em breve</span>
