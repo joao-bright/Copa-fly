@@ -122,7 +122,7 @@ export default function Home() {
             .eq('cpf', cpf)
             .order('created_at', { ascending: false });
 
-          const activeTicket = tickets?.find(t => t.status === 'ACTIVE' || t.status === 'PENDING');
+          const activeTicket = tickets?.find(t => t.status === 'ACTIVE');
           if (activeTicket) {
             setHasExistingTicket(true);
             if (isLocked) {
@@ -660,7 +660,7 @@ export default function Home() {
           <div className="space-y-10 w-full max-w-md mb-16 relative z-10">
             {[0, 1, 2].map(ticketIdx => (ticketIdx < ticketsToBuy ? <BracketVisual key={ticketIdx} selections={selections[ticketIdx]} bracket={getBracketTeams(ticketIdx)} standingsA={calculateStandings('A', ticketIdx)} standingsB={calculateStandings('B', ticketIdx)} matches={matches} ticketIdx={ticketIdx} /> : null))}
           </div>
-          <div className="fixed bottom-24 left-0 w-full p-4 z-[100] flex flex-col gap-3 bg-black/95 backdrop-blur-xl border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md p-6 pb-8 z-[100] flex flex-col gap-3 bg-black/90 backdrop-blur-xl border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.8)]">
             <button onClick={() => handleBack()} className="w-full bg-zinc-900 border border-white/10 text-white/40 font-black uppercase py-4 rounded-2xl text-[9px] tracking-[0.3em] hover:text-white transition-all italic flex items-center justify-center gap-2 active:scale-95"><ArrowLeft className="w-3 h-3" /> REVISAR PALPITES</button>
             <button onClick={() => setStep('PAYMENT')} className="w-full bg-primary text-black font-black italic uppercase py-5 rounded-2xl flex items-center justify-between px-6 shadow-[0_15px_40px_rgba(250,204,21,0.3)] transition-all active:scale-95 group">
               <div className="text-left flex flex-col justify-center">
@@ -743,8 +743,16 @@ export default function Home() {
           })
         });
         const data = await res.json();
-        if (data.success) setPixData(data); else alert('Erro ao gerar cobrança.');
-      } catch (err) { alert('Erro de conexão.'); } finally { setIsPaying(false); }
+        if (data.success) {
+          setPixData(data);
+        } else {
+          alert(`Erro ao gerar cobrança: ${data.error || 'Tente novamente em instantes.'}`);
+        }
+      } catch (err: any) {
+        alert(`Erro de conexão: ${err.message || 'Verifique sua internet.'}`);
+      } finally {
+        setIsPaying(false);
+      }
     };
     if (!pixData && !isPaying) handleFinalize();
     content = (

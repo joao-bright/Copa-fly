@@ -25,6 +25,18 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'As apostas estão encerradas para este torneio.' }, { status: 403 });
         }
 
+        // 0. Check for existing active tickets for this CPF
+        const { data: existingActive } = await supabase
+            .from('tickets')
+            .select('id')
+            .eq('cpf', cpf)
+            .eq('status', 'ACTIVE')
+            .maybeSingle();
+
+        if (existingActive) {
+            return NextResponse.json({ success: false, error: 'Você já possui um bilhete ativo com este CPF.' }, { status: 400 });
+        }
+
         // 1. Create a PENDING ticket in Supabase
         const { data: ticket, error: tError } = await supabase
             .from('tickets')
