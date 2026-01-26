@@ -43,7 +43,8 @@ export default function AdminDashboard() {
     const toggleGuessesLocked = async () => {
         const newVal = !guessesLocked;
         setGuessesLocked(newVal);
-        await supabase.from('settings').upsert({ key: 'guesses_locked', value: newVal });
+        const { error } = await supabase.from('settings').upsert({ key: 'guesses_locked', value: newVal }, { onConflict: 'key' });
+        if (error) alert('Erro ao salvar trava: ' + error.message);
     };
 
     const handleReset = async () => {
@@ -168,32 +169,49 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className={cn(
-                    "p-10 rounded-[3rem] border shadow-2xl transition-all relative overflow-hidden group cursor-pointer",
+                    "p-10 rounded-[3rem] border shadow-2xl transition-all relative overflow-hidden group h-full flex flex-col justify-between",
                     guessesLocked
-                        ? "bg-red-500/10 border-red-500/20"
-                        : "bg-green-500/10 border-green-500/20"
-                )} onClick={toggleGuessesLocked}>
-                    <div className="flex justify-between items-start mb-6">
+                        ? "bg-red-500/10 border-red-500/20 shadow-red-500/5"
+                        : "bg-green-500/10 border-green-500/20 shadow-green-500/5"
+                )}>
+                    <div className="flex justify-between items-start mb-4">
                         <div className={cn(
-                            "w-12 h-12 rounded-2xl flex items-center justify-center border",
-                            guessesLocked ? "bg-red-500/20 border-red-500/30" : "bg-green-500/20 border-green-500/30"
+                            "w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors",
+                            guessesLocked ? "bg-red-500/20 border-red-500/30 text-red-500" : "bg-green-500/20 border-green-500/30 text-green-500"
                         )}>
-                            <ShieldCheck className={cn("w-6 h-6", guessesLocked ? "text-red-500" : "text-green-500")} />
+                            <ShieldCheck className="w-6 h-6" />
                         </div>
-                        <div className={cn(
-                            "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest",
-                            guessesLocked ? "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)]" : "bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.5)]"
-                        )}>
-                            {guessesLocked ? 'BLOQUEADO' : 'ABERTO'}
+
+                        {/* Realistic Switch Toggle */}
+                        <div
+                            onClick={toggleGuessesLocked}
+                            className={cn(
+                                "w-16 h-8 rounded-full p-1 cursor-pointer transition-all duration-300 relative",
+                                guessesLocked ? "bg-red-500" : "bg-zinc-800"
+                            )}
+                        >
+                            <div className={cn(
+                                "w-6 h-6 bg-white rounded-full transition-all duration-300 shadow-xl",
+                                guessesLocked ? "translate-x-8" : "translate-x-0"
+                            )} />
                         </div>
                     </div>
-                    <span className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em] mb-2 block">Novos Palpites</span>
-                    <div className="text-3xl font-black italic text-white tracking-tighter">
-                        {guessesLocked ? 'ENTRADAS FECHADAS' : 'RECEBENDO APOSTAS'}
+
+                    <div>
+                        <span className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em] mb-2 block">Trava de Segurança</span>
+                        <div className={cn(
+                            "text-3xl font-black italic tracking-tighter uppercase leading-none mb-4",
+                            guessesLocked ? "text-red-500" : "text-green-500"
+                        )}>
+                            {guessesLocked ? 'Entradas Fechadas' : 'Recebendo Apostas'}
+                        </div>
                     </div>
-                    <div className="mt-6 flex items-center gap-2">
-                        <RefreshCcw className={cn("w-4 h-4 opacity-50", !guessesLocked && "animate-spin-slow")} />
-                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none">Toque para {guessesLocked ? 'abrir' : 'trancar'}</span>
+
+                    <div className="mt-2 flex items-center gap-2">
+                        <div className={cn("w-1.5 h-1.5 rounded-full", guessesLocked ? "bg-red-500 animate-pulse" : "bg-green-500 animate-pulse")} />
+                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none">
+                            {guessesLocked ? 'Novos palpites bloqueados' : 'Palpites estão liberados'}
+                        </span>
                     </div>
                 </div>
             </div>

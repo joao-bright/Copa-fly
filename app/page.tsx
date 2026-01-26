@@ -221,7 +221,6 @@ export default function Home() {
       <div onClick={() => setStep('GROUP_1')} className="flex items-center gap-3 cursor-pointer group">
         <div className="relative">
           <img src="/logo.jpg" alt="Fly Cup" className="w-14 h-14 object-contain rounded-full border-2 border-primary/20 group-hover:border-primary/50 transition-all shadow-[0_0_20px_rgba(250,204,21,0.2)]" />
-          <div className="absolute -bottom-1 -right-1 bg-primary text-black text-[8px] font-black px-1.5 py-0.5 rounded-md italic shadow-lg">FLY</div>
         </div>
         <div className="flex flex-col">
           <span className="text-[10px] text-primary font-black uppercase tracking-[0.3em] leading-none mb-1 italic">Palpites Especial</span>
@@ -445,7 +444,7 @@ export default function Home() {
             {/* Notice Bar */}
             <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 mb-8 flex items-center justify-center gap-3 animate-pulse">
               <Lock className="w-4 h-4 text-red-500" />
-              <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic">Palpites Encerrados para esta Copa</span>
+              <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic text-center">Os jogos já começaram, palpites não estão mais disponíveis</span>
             </div>
             {renderLiveHome()}
           </div>
@@ -586,6 +585,45 @@ export default function Home() {
                 `}</style>
           </div>
         </main>
+
+        {/* Global Floating Navigation Bar */}
+        <div className="fixed bottom-0 left-0 w-full p-4 z-[110] bg-black/95 backdrop-blur-xl border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+          <div className="max-w-lg mx-auto flex items-center gap-3">
+            {/* Back Button */}
+            <button
+              onClick={handleBack}
+              className="w-16 h-16 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all active:scale-95 flex-shrink-0"
+              disabled={step === 'GROUP_1'}
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+
+            {/* Next Button */}
+            <button
+              onClick={handleNext}
+              disabled={!canAdvance()}
+              className={cn(
+                "flex-1 h-16 rounded-2xl font-black italic uppercase text-lg tracking-widest transition-all active:scale-95 flex items-center justify-between px-8",
+                canAdvance()
+                  ? "bg-primary text-black shadow-[0_10px_30px_rgba(250,204,21,0.3)]"
+                  : "bg-zinc-900 text-white/10 border border-white/5 cursor-not-allowed"
+              )}
+            >
+              <span>{step === 'FINAL' ? 'CONCLUIR' : 'PRÓXIMO'}</span>
+              <ArrowRight className={cn("w-6 h-6", canAdvance() ? "animate-bounce-x" : "opacity-20")} />
+            </button>
+          </div>
+        </div>
+
+        <style jsx global>{`
+          @keyframes bounce-x {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+          }
+          .animate-bounce-x {
+            animation: bounce-x 1s infinite;
+          }
+        `}</style>
       </div>
     );
   }

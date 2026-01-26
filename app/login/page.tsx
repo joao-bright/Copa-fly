@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Key, ShieldCheck, LogIn, Trophy } from 'lucide-react';
 import { cn, formatCPF, validateCPF } from '@/lib/utils';
@@ -11,17 +12,39 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
         if (!validateCPF(cpf)) return setError('CPF inválido.');
         if (!password) return setError('Senha obrigatória.');
 
-        // Simulate login
-        localStorage.setItem('copa_user_cpf', cpf);
-        localStorage.setItem('copa_user_name', 'Usuário Fly'); // Mock name
-        router.push('/tickets');
+        try {
+            const { data, error: dbError } = await supabase
+                .from('tickets')
+                .select('*')
+                .eq('cpf', cpf)
+                .maybeSingle();
+
+            if (dbError) throw dbError;
+
+            if (!data) {
+                return setError('CPF não encontrado. Crie um bilhete primeiro!');
+            }
+
+            // Simple password check (assuming stored in 'password' column)
+            if (data.password && data.password !== password) {
+                return setError('Senha incorreta.');
+            }
+
+            localStorage.setItem('copa_user_cpf', cpf);
+            localStorage.setItem('copa_user_name', (data as any).customer_name || 'Usuário Fly');
+            localStorage.setItem('copa_user_email', (data as any).customer_email || '');
+
+            router.push('/tickets');
+        } catch (err: any) {
+            setError('Erro ao fazer login: ' + err.message);
+        }
     };
 
     return (
@@ -81,7 +104,20 @@ export default function LoginPage() {
                             Não tem palpites ainda?
                         </p>
                         <button onClick={() => router.push('/')} className="mt-2 text-[11px] font-black text-primary uppercase underline italic">
-                            CRIAR BILHETE AGORA
+                            CRIAR NOVO BILHETE
+                        </button>
+                    </div>
+
+                    <div className="pt-2 text-center">
+                        <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                            Novo por aqui?
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => router.push('/')}
+                            className="mt-3 w-full bg-white/5 border border-white/5 py-4 rounded-xl text-[10px] font-black text-white uppercase italic hover:bg-white/10 transition-all"
+                        >
+                            CADASTRAR / CRIAR CONTA
                         </button>
                     </div>
                 </form>
