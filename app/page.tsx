@@ -579,10 +579,6 @@ export default function Home() {
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10" />
             </div>
 
-            <style jsx>{`
-                    .scrollbar-hide::-webkit-scrollbar { display: none; }
-                    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-                `}</style>
           </div>
         </main>
 
@@ -616,6 +612,8 @@ export default function Home() {
         </div>
 
         <style jsx global>{`
+          .scrollbar-hide::-webkit-scrollbar { display: none; }
+          .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
           @keyframes bounce-x {
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(5px); }
