@@ -49,7 +49,7 @@ export default function Home() {
   const [ticketsToBuy, setTicketsToBuy] = useState(1);
   const [activeTicketIdx, setActiveTicketIdx] = useState(0);
   const [selections, setSelections] = useState<Record<string, string>[]>([{}, {}, {}]);
-  const [regData, setRegData] = useState({ name: '', cpf: '', email: '', password: '', phone: '' });
+  const [regData, setRegData] = useState({ name: '', cpf: '', email: '', password: '', confirmPassword: '', phone: '' });
   const [regError, setRegError] = useState('');
   const [loading, setLoading] = useState(true);
   const [pixData, setPixData] = useState<{ pix_qr_code: string, pix_copy_paste: string, order_id: string } | null>(null);
@@ -679,7 +679,8 @@ export default function Home() {
   } else if (step === 'REGISTER') {
     const handleRegSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      if (!regData.name || !regData.cpf || !regData.email || !regData.password || !regData.phone) return setRegError('Todos os campos são obrigatórios.');
+      if (!regData.name || !regData.cpf || !regData.email || !regData.password || !regData.confirmPassword || !regData.phone) return setRegError('Todos os campos são obrigatórios.');
+      if (regData.password !== regData.confirmPassword) return setRegError('As senhas não coincidem.');
       if (!validateCPF(regData.cpf)) return setRegError('CPF inválido.');
       localStorage.setItem('copa_user_cpf', regData.cpf);
       localStorage.setItem('copa_user_name', regData.name);
@@ -697,7 +698,12 @@ export default function Home() {
             <p className="text-white/40 text-[9px] uppercase font-black tracking-[0.2em] italic">Cadastre-se para salvar seus palpites</p>
           </div>
           <form onSubmit={handleRegSubmit} className="space-y-4">
-            {[{ label: 'Nome Completo', val: regData.name, set: (v: string) => setRegData({ ...regData, name: v }), ph: 'JOÃO SILVA' }, { label: 'CPF', val: regData.cpf, set: (v: string) => setRegData({ ...regData, cpf: formatCPF(v) }), ph: '000.000.000-00', mono: true, max: 14 }, { label: 'Telefone (WhatsApp)', val: regData.phone, set: (v: string) => setRegData({ ...regData, phone: formatPhone(v) }), ph: '(11) 99999-9999', mono: true, max: 15 }, { label: 'E-mail', val: regData.email, set: (v: string) => setRegData({ ...regData, email: v }), ph: 'seu@email.com', type: 'email' }, { label: 'Senha', val: regData.password, set: (v: string) => setRegData({ ...regData, password: v }), ph: '******', type: 'password' }].map((f, i) => (
+            {[{ label: 'Nome Completo', val: regData.name, set: (v: string) => setRegData({ ...regData, name: v }), ph: 'JOÃO SILVA' },
+            { label: 'CPF', val: regData.cpf, set: (v: string) => setRegData({ ...regData, cpf: formatCPF(v) }), ph: '000.000.000-00', mono: true, max: 14 },
+            { label: 'Telefone (WhatsApp)', val: regData.phone, set: (v: string) => setRegData({ ...regData, phone: formatPhone(v) }), ph: '(11) 99999-9999', mono: true, max: 15 },
+            { label: 'E-mail', val: regData.email, set: (v: string) => setRegData({ ...regData, email: v }), ph: 'seu@email.com', type: 'email' },
+            { label: 'Senha', val: regData.password, set: (v: string) => setRegData({ ...regData, password: v }), ph: '******', type: 'password' },
+            { label: 'Confirmar Senha', val: regData.confirmPassword, set: (v: string) => setRegData({ ...regData, confirmPassword: v }), ph: '******', type: 'password' }].map((f, i) => (
               <div key={i} className="space-y-1.5">
                 <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">{f.label}</label>
                 <input type={f.type || 'text'} placeholder={f.ph} className={cn("w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10", f.mono && "font-mono text-center tracking-[0.1em]")} value={f.val} onChange={(e) => f.set(e.target.value)} maxLength={f.max} />
@@ -715,14 +721,17 @@ export default function Home() {
       setIsPaying(true);
       try {
         const allBets = selections.slice(0, ticketsToBuy).flatMap((sel, idx) => {
+          const semi1 = matches.find(m => m.phase === 'SEMI' && m.startTime === '14:00');
+          const semi2 = matches.find(m => m.phase === 'SEMI' && m.startTime === '15:00');
+          const finalMatchReal = matches.find(m => m.phase === 'FINAL');
+
           const ticketBets = [
             ...groupMatches.map(m => ({ matchId: m.id, selectedTeamId: sel[m.id] })),
-            { matchId: 'derived_s1', selectedTeamId: sel['derived_s1'] },
-            { matchId: 'derived_s2', selectedTeamId: sel['derived_s2'] },
-            { matchId: 'derived_f1', selectedTeamId: sel['derived_f1'] }
+            { matchId: semi1?.id, selectedTeamId: sel['derived_s1'] },
+            { matchId: semi2?.id, selectedTeamId: sel['derived_s2'] },
+            { matchId: finalMatchReal?.id, selectedTeamId: sel['derived_f1'] }
           ];
-          // Filter out any bets where selectedTeamId is missing
-          return ticketBets.filter(b => b.selectedTeamId);
+          return ticketBets.filter(b => b.selectedTeamId && b.matchId && !b.matchId.toString().startsWith('derived'));
         });
 
         const customerName = regData.name || localStorage.getItem('copa_user_name') || 'Nome não informado';
