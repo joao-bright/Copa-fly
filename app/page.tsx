@@ -147,6 +147,16 @@ export default function Home() {
     fetchData();
   }, [isLoggedIn]); // Added isLoggedIn to dependency array to refetch if user logs in/out
 
+  // Block body scroll when modals are open
+  useEffect(() => {
+    if (showTutorial || hasExistingTicket) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showTutorial, hasExistingTicket]);
+
   const groupMatches = useMemo(() => matches.filter(m => m.phase === 'GROUP'), [matches]);
   const round1Matches = useMemo(() => matches.filter(m => m.phase === 'GROUP' && m.round === 1), [matches]);
   const round2Matches = useMemo(() => matches.filter(m => m.phase === 'GROUP' && m.round === 2), [matches]);
@@ -546,13 +556,15 @@ export default function Home() {
     </div>
   );
 
+  // --- RENDER CONTENT SELECTION ---
+  let content = null;
+
   if (guessesLocked && step !== 'SUCCESS') {
-    return (
+    content = (
       <div className="min-h-screen bg-black relative">
         {renderHeader()}
         <main className="min-h-screen pb-44 flex flex-col relative overflow-x-hidden pt-20">
           <div className="container mx-auto px-4 flex-1 flex flex-col max-w-lg">
-            {/* Notice Bar */}
             <div className="flex-1 flex flex-col items-center justify-center -mt-10 pb-44">
               <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6 animate-pulse">
                 <Lock className="w-6 h-6 text-red-500" />
@@ -563,7 +575,6 @@ export default function Home() {
               <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] italic text-center px-12 leading-relaxed">
                 Palpites encerrados para esta rodada.
               </p>
-
               <button
                 onClick={() => router.push('/live')}
                 className="mt-8 bg-white text-black font-black uppercase py-4 px-8 rounded-xl italic tracking-widest text-xs shadow-[0_20px_40px_rgba(255,255,255,0.05)] active:scale-95 transition-all flex items-center gap-2"
@@ -575,38 +586,25 @@ export default function Home() {
         </main>
       </div>
     );
-  }
-
-  if (['GROUP_1', 'GROUP_2', 'GROUP_3', 'SEMIS', 'FINAL'].includes(step)) {
+  } else if (['GROUP_1', 'GROUP_2', 'GROUP_3', 'SEMIS', 'FINAL'].includes(step)) {
     const isGroupStep = step.startsWith('GROUP');
-    return (
+    content = (
       <div className="min-h-screen bg-black relative">
         {renderHeader()}
-
         <main className="min-h-screen pb-44 flex flex-col relative overflow-x-hidden pt-20">
           <div className="container mx-auto px-4 flex-1 flex flex-col max-w-lg">
             {renderProgress()}
-
-
-
             <div className="mb-8 flex items-center justify-between px-2">
               <div className="flex flex-col text-left">
                 <p className="text-white/10 text-[8px] font-black uppercase tracking-[0.4em] mb-1 italic">Simulator</p>
                 <h2 className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter uppercase leading-[0.9] flex flex-col">
-                  <span>{step === 'GROUP_1' ? 'RODADA 01' :
-                    step === 'GROUP_2' ? 'RODADA 02' :
-                      step === 'GROUP_3' ? 'RODADA 03' :
-                        step === 'SEMIS' ? 'SEMI' : 'GRANDE'}</span>
+                  <span>{step === 'GROUP_1' ? 'RODADA 01' : step === 'GROUP_2' ? 'RODADA 02' : step === 'GROUP_3' ? 'RODADA 03' : step === 'SEMIS' ? 'SEMI' : 'GRANDE'}</span>
                   <span className="text-primary not-italic font-sans">{step === 'SEMIS' ? 'FINAIS' : step === 'FINAL' ? 'FINAL' : 'GRUPOS'}</span>
                 </h2>
               </div>
-
               <button
                 onClick={() => setShowSimulator(!showSimulator)}
-                className={cn(
-                  "group flex items-center gap-2.5 py-1.5 px-3.5 rounded-xl border transition-all active:scale-95 shadow-lg",
-                  showSimulator ? "bg-zinc-900 border-white/10" : "bg-primary border-primary shadow-[0_0_20px_rgba(250,204,21,0.2)]"
-                )}
+                className={cn("group flex items-center gap-2.5 py-1.5 px-3.5 rounded-xl border transition-all active:scale-95 shadow-lg", showSimulator ? "bg-zinc-900 border-white/10" : "bg-primary border-primary shadow-[0_0_20px_rgba(250,204,21,0.2)]")}
               >
                 <div className={cn("w-5 h-5 rounded-lg flex items-center justify-center border", showSimulator ? "bg-zinc-800 border-white/5 text-white/40" : "bg-black border-black text-primary animate-pulse")}>
                   {showSimulator ? <X className="w-3 h-3" /> : <LayoutDashboard className="w-3 h-3" />}
@@ -617,74 +615,22 @@ export default function Home() {
                 </div>
               </button>
             </div>
-
             <div className="flex gap-4 flex-1 h-full relative">
-              {/* Left Column (Matches) */}
-              <div className={cn(
-                "overflow-y-auto overflow-x-hidden space-y-4 pb-48 scrollbar-hide duration-700 ease-in-out transition-all px-1",
-                showSimulator ? "flex-[0.45] scale-100" : "flex-1 scale-100 flex flex-col items-center"
-              )}>
+              <div className={cn("overflow-y-auto overflow-x-hidden space-y-4 pb-48 scrollbar-hide duration-700 ease-in-out transition-all px-1", showSimulator ? "flex-[0.45] scale-100" : "flex-1 scale-100 flex flex-col items-center")}>
                 {(step === 'SEMIS' ? semiMatches : step === 'FINAL' ? [finalMatch] : currentMatches).map((match: Match) => (
                   <div key={match.id} className={cn("w-full transition-all", !showSimulator && "max-w-md")}>
-                    <GameCard
-                      match={match}
-                      isVertical={showSimulator}
-                      selection={selections[activeTicketIdx][match.id] || null}
-                      onSelect={(teamId) => handleSelect(match.id, teamId)}
-                    />
+                    <GameCard match={match} isVertical={showSimulator} selection={selections[activeTicketIdx][match.id] || null} onSelect={(teamId) => handleSelect(match.id, teamId)} />
                   </div>
                 ))}
-
-                {/* Navigation Buttons inside Scroll */}
                 <div className="pt-10 pb-44 w-full max-w-md flex flex-col gap-3">
-                  <button
-                    onClick={handleNext}
-                    disabled={!canAdvance()}
-                    className={cn(
-                      "w-full h-16 rounded-2xl font-black italic uppercase text-lg tracking-widest transition-all active:scale-95 flex items-center justify-between px-8",
-                      canAdvance()
-                        ? "bg-primary text-black shadow-[0_10px_30px_rgba(250,204,21,0.3)]"
-                        : "bg-zinc-900/50 text-white/10 border border-white/5 cursor-not-allowed"
-                    )}
-                  >
+                  <button onClick={handleNext} disabled={!canAdvance()} className={cn("w-full h-16 rounded-2xl font-black italic uppercase text-lg tracking-widest transition-all active:scale-95 flex items-center justify-between px-8", canAdvance() ? "bg-primary text-black shadow-[0_10px_30px_rgba(250,204,21,0.3)]" : "bg-zinc-900/50 text-white/10 border border-white/5 cursor-not-allowed")}>
                     <span>{step === 'FINAL' ? 'CONCLUIR' : 'PRÓXIMO PASSO'}</span>
                     <ArrowRight className={cn("w-6 h-6", canAdvance() ? "animate-bounce-x" : "opacity-10")} />
                   </button>
-
-                  <button
-                    onClick={handleBack}
-                    className="w-full py-4 text-[9px] font-black uppercase text-white/20 tracking-[0.4em] italic hover:text-white transition-all flex items-center justify-center gap-2"
-                    disabled={step === 'GROUP_1'}
-                  >
-                    <ChevronLeft className="w-3 h-3" /> Voltar
-                  </button>
+                  <button onClick={handleBack} className="w-full py-4 text-[9px] font-black uppercase text-white/20 tracking-[0.4em] italic hover:text-white transition-all flex items-center justify-center gap-2" disabled={step === 'GROUP_1'}><ChevronLeft className="w-3 h-3" /> Voltar</button>
                 </div>
               </div>
-
-              {/* Trava de Bilhete Único Overlay */}
-              {hasExistingTicket && (
-                <div className="absolute inset-0 z-[100] backdrop-blur-md bg-black/60 flex items-center justify-center p-6 animate-in fade-in duration-500">
-                  <div className="glass-panel p-8 rounded-[2.5rem] border border-white/10 shadow-3xl text-center max-w-sm">
-                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/20 rotate-12">
-                      <ShieldCheck className="w-8 h-8 text-primary" />
-                    </div>
-                    <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase mb-2">BILHETE JÁ REGISTRADO</h2>
-                    <p className="text-white/40 text-[9px] uppercase font-black tracking-[0.2em] leading-relaxed mb-8">O limite é de 01 bilhete por CPF. <br /> Você já possui um palpite ativo!</p>
-                    <button
-                      onClick={() => router.push('/tickets')}
-                      className="w-full bg-primary text-black font-black uppercase py-4 rounded-xl shadow-lg text-xs italic active:scale-95 transition-all"
-                    >
-                      VER MEU BILHETE
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Right Column (Simulator) */}
-              <div className={cn(
-                "overflow-y-auto overflow-x-hidden pb-48 scrollbar-hide transition-all duration-700 ease-in-out h-full",
-                showSimulator ? "flex-[0.55] opacity-100 translate-x-0" : "flex-[0] opacity-0 translate-x-32 pointer-events-none"
-              )}>
+              <div className={cn("overflow-y-auto overflow-x-hidden pb-48 scrollbar-hide transition-all duration-700 ease-in-out h-full", showSimulator ? "flex-[0.55] opacity-100 translate-x-0" : "flex-[0] opacity-0 translate-x-32 pointer-events-none")}>
                 {showSimulator && (
                   <div className="space-y-4">
                     {isGroupStep ? (
@@ -698,43 +644,18 @@ export default function Home() {
                           <X className="w-3 h-3 text-red-500/50 group-hover:text-red-500" /> Fechar Simulador
                         </button>
                       </>
-                    ) : (
-                      renderTinyBracket()
-                    )}
+                    ) : renderTinyBracket()}
                   </div>
                 )}
               </div>
-
-              {/* Scroll Hint Gradient */}
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10" />
             </div>
-
           </div>
         </main>
-
-        {renderTutorial()}
-
-        <style jsx global>{`
-          .scrollbar-hide::-webkit-scrollbar { display: none; }
-          .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-          @keyframes bounce-x {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(5px); }
-          }
-          .animate-bounce-x {
-            animation: bounce-x 1s infinite;
-          }
-          .hide-nav nav {
-            display: none !important;
-          }
-        `}</style>
       </div>
     );
-  }
-
-  // --- SUMMARY STEP (Gamified Edition) ---
-  if (step === 'SUMMARY') {
-    return (
+  } else if (step === 'SUMMARY') {
+    content = (
       <main className="min-h-screen bg-black relative overflow-x-hidden w-full">
         <div className="absolute inset-x-0 top-0 h-96 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.05),transparent_70%)] pointer-events-none" />
         {renderHeader()}
@@ -744,39 +665,12 @@ export default function Home() {
             <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none mb-4">REVISÃO FINAL</h1>
             <div className="text-[10px] text-primary font-black tracking-[0.4em] uppercase bg-primary/10 py-2 rounded-full px-6 inline-block italic border border-primary/30 shadow-[0_0_15px_rgba(250,204,21,0.1)]">{userCpf}</div>
           </div>
-
           <div className="space-y-10 w-full max-w-md mb-16 relative z-10">
-            {[0, 1, 2].map(ticketIdx => {
-              if (ticketIdx >= ticketsToBuy) return null;
-              const standingsA = calculateStandings('A', ticketIdx);
-              const standingsB = calculateStandings('B', ticketIdx);
-              const bracketTeams = { a1: standingsA[0], a2: standingsA[1], b1: standingsB[0], b2: standingsB[1] };
-
-              return (
-                <BracketVisual
-                  key={ticketIdx}
-                  selections={selections[ticketIdx]}
-                  bracket={bracketTeams}
-                  standingsA={standingsA}
-                  standingsB={standingsB}
-                  matches={matches}
-                  ticketIdx={ticketIdx}
-                />
-              );
-            })}
+            {[0, 1, 2].map(ticketIdx => (ticketIdx < ticketsToBuy ? <BracketVisual key={ticketIdx} selections={selections[ticketIdx]} bracket={getBracketTeams(ticketIdx)} standingsA={calculateStandings('A', ticketIdx)} standingsB={calculateStandings('B', ticketIdx)} matches={matches} ticketIdx={ticketIdx} /> : null))}
           </div>
-
           <div className="fixed bottom-24 left-0 w-full p-4 z-[100] flex flex-col gap-3 bg-black/95 backdrop-blur-xl border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-            <button
-              onClick={() => handleBack()}
-              className="w-full bg-zinc-900 border border-white/10 text-white/40 font-black uppercase py-4 rounded-2xl text-[9px] tracking-[0.3em] hover:text-white transition-all italic flex items-center justify-center gap-2 active:scale-95"
-            >
-              <ArrowLeft className="w-3 h-3" /> REVISAR PALPITES
-            </button>
-            <button
-              onClick={() => setStep('PAYMENT')}
-              className="w-full bg-primary text-black font-black italic uppercase py-5 rounded-2xl flex items-center justify-between px-6 shadow-[0_15px_40px_rgba(250,204,21,0.3)] transition-all active:scale-95 group"
-            >
+            <button onClick={() => handleBack()} className="w-full bg-zinc-900 border border-white/10 text-white/40 font-black uppercase py-4 rounded-2xl text-[9px] tracking-[0.3em] hover:text-white transition-all italic flex items-center justify-center gap-2 active:scale-95"><ArrowLeft className="w-3 h-3" /> REVISAR PALPITES</button>
+            <button onClick={() => setStep('PAYMENT')} className="w-full bg-primary text-black font-black italic uppercase py-5 rounded-2xl flex items-center justify-between px-6 shadow-[0_15px_40px_rgba(250,204,21,0.3)] transition-all active:scale-95 group">
               <div className="text-left flex flex-col justify-center">
                 <span className="text-[8px] opacity-60 font-black tracking-widest leading-none uppercase mb-0.5">FINALIZAR</span>
                 <span className="text-sm font-black italic leading-none">PAGAR E REGISTRAR</span>
@@ -788,30 +682,9 @@ export default function Home() {
             </button>
           </div>
         </div>
-        {renderTutorial()}
-
-        <style jsx global>{`
-          .scrollbar-hide::-webkit-scrollbar { display: none; }
-          .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-          @keyframes bounce-x {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(5px); }
-          }
-          .animate-bounce-x {
-            animation: bounce-x 1s infinite;
-          }
-          .hide-nav nav {
-            display: none !important;
-          }
-        `}</style>
       </main>
     );
-  }
-
-
-
-  // --- REGISTER STEP ---
-  if (step === 'REGISTER') {
+  } else if (step === 'REGISTER') {
     const handleRegSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       if (!regData.name || !regData.cpf || !regData.email || !regData.password || !regData.phone) return setRegError('Todos os campos são obrigatórios.');
@@ -822,77 +695,36 @@ export default function Home() {
       localStorage.setItem('copa_user_phone', regData.phone);
       setIsLoggedIn(true); setUserCpf(regData.cpf); setStep('SUMMARY'); window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-    return (
+    content = (
       <main className="min-h-screen flex items-center justify-center bg-black p-4 overflow-hidden relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.05),transparent_70%)] pointer-events-none" />
         <div className="w-full max-w-sm bg-zinc-950/80 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative animate-in zoom-in-95 duration-500">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-primary/20 rotate-3 shadow-[0_0_20px_rgba(250,204,21,0.1)]">
-              <User className="w-8 h-8 text-primary" />
-            </div>
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-primary/20 rotate-3 shadow-[0_0_20px_rgba(250,204,21,0.1)]"><User className="w-8 h-8 text-primary" /></div>
             <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none mb-2">QUASE LÁ!</h2>
             <p className="text-white/40 text-[9px] uppercase font-black tracking-[0.2em] italic">Cadastre-se para salvar seus palpites</p>
           </div>
-
           <form onSubmit={handleRegSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">Nome Completo</label>
-              <input type="text" placeholder="JOÃO SILVA" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.name} onChange={(e) => setRegData({ ...regData, name: e.target.value })} />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">CPF</label>
-              <input type="text" placeholder="000.000.000-00" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.2em] text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.cpf} onChange={(e) => setRegData({ ...regData, cpf: formatCPF(e.target.value) })} maxLength={14} />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">Telefone (WhatsApp)</label>
-              <input
-                type="tel"
-                placeholder="(11) 99999-9999"
-                className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-mono text-center tracking-[0.1em] text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10"
-                value={regData.phone}
-                onChange={(e) => setRegData({ ...regData, phone: formatPhone(e.target.value) })}
-                maxLength={15}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">E-mail</label>
-              <input type="email" placeholder="seu@email.com" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.email} onChange={(e) => setRegData({ ...regData, email: e.target.value })} />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">Senha</label>
-              <input type="password" placeholder="******" className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10" value={regData.password} onChange={(e) => setRegData({ ...regData, password: e.target.value })} />
-            </div>
-
+            {[{ label: 'Nome Completo', val: regData.name, set: (v: string) => setRegData({ ...regData, name: v }), ph: 'JOÃO SILVA' }, { label: 'CPF', val: regData.cpf, set: (v: string) => setRegData({ ...regData, cpf: formatCPF(v) }), ph: '000.000.000-00', mono: true, max: 14 }, { label: 'Telefone (WhatsApp)', val: regData.phone, set: (v: string) => setRegData({ ...regData, phone: formatPhone(v) }), ph: '(11) 99999-9999', mono: true, max: 15 }, { label: 'E-mail', val: regData.email, set: (v: string) => setRegData({ ...regData, email: v }), ph: 'seu@email.com', type: 'email' }, { label: 'Senha', val: regData.password, set: (v: string) => setRegData({ ...regData, password: v }), ph: '******', type: 'password' }].map((f, i) => (
+              <div key={i} className="space-y-1.5">
+                <label className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] ml-3 italic">{f.label}</label>
+                <input type={f.type || 'text'} placeholder={f.ph} className={cn("w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white font-black uppercase text-base outline-none focus:border-primary/40 focus:bg-black/60 transition-all placeholder:text-white/10", f.mono && "font-mono text-center tracking-[0.1em]")} value={f.val} onChange={(e) => f.set(e.target.value)} maxLength={f.max} />
+              </div>
+            ))}
             {regError && <p className="text-red-500 text-[9px] font-black uppercase text-center bg-red-500/10 py-2 rounded-lg border border-red-500/20">{regError}</p>}
-
-            <button type="submit" className="w-full bg-primary text-black font-black uppercase py-5 rounded-[1.2rem] shadow-[0_10px_30px_rgba(250,204,21,0.2)] text-sm italic active:scale-95 transition-all hover:bg-amber-300 mt-2">
-              SALVAR E CONTINUAR
-            </button>
+            <button type="submit" className="w-full bg-primary text-black font-black uppercase py-5 rounded-[1.2rem] shadow-[0_10px_30px_rgba(250,204,21,0.2)] text-sm italic active:scale-95 transition-all hover:bg-amber-300 mt-2">SALVAR E CONTINUAR</button>
           </form>
         </div>
       </main>
     );
-  }
-
-  if (step === 'PAYMENT') {
+  } else if (step === 'PAYMENT') {
     const finalPrice = ticketsToBuy === 1 ? 0.10 : ticketsToBuy === 2 ? 0.15 : 0.20;
     const handleFinalize = async () => {
       setIsPaying(true);
       try {
         const allBets = selections.slice(0, ticketsToBuy).flatMap((sel, idx) => {
-          const standingsA = calculateStandings('A', idx);
-          const standingsB = calculateStandings('B', idx);
-          const bracketTeams = { a1: standingsA[0], a2: standingsA[1], b1: standingsB[0], b2: standingsB[1] };
-          return [
-            ...groupMatches.map(m => ({ matchId: m.id, selectedTeamId: sel[m.id] })),
-            { matchId: 'derived_s1', selectedTeamId: sel['derived_s1'] },
-            { matchId: 'derived_s2', selectedTeamId: sel['derived_s2'] },
-            { matchId: 'derived_f1', selectedTeamId: sel['derived_f1'] }
-          ];
+          const bracket = getBracketTeams(idx);
+          return [...groupMatches.map(m => ({ matchId: m.id, selectedTeamId: sel[m.id] })), { matchId: 'derived_s1', selectedTeamId: sel['derived_s1'] }, { matchId: 'derived_s2', selectedTeamId: sel['derived_s2'] }, { matchId: 'derived_f1', selectedTeamId: sel['derived_f1'] }];
         });
         const customerName = regData.name || localStorage.getItem('copa_user_name') || 'Nome não informado';
         const customerEmail = regData.email || localStorage.getItem('copa_user_email') || 'email@naoinformado.com';
@@ -914,87 +746,83 @@ export default function Home() {
       } catch (err) { alert('Erro de conexão.'); } finally { setIsPaying(false); }
     };
     if (!pixData && !isPaying) handleFinalize();
-    return (
+    content = (
       <div className="min-h-screen flex items-center justify-center p-6 bg-black pt-20 overflow-x-hidden">
         {renderHeader()}
-        <div className="glass-panel p-10 rounded-[3.5rem] w-full max-w-sm border border-white/10 shadow-3xl text-center relative overflow-hidden animate-in zoom-in-95 backdrop-blur-2xl">
+        <div className="glass-panel p-10 rounded-[3.5rem] w-full max-sm:px-6 max-w-sm border border-white/10 shadow-3xl text-center relative overflow-hidden animate-in zoom-in-95 backdrop-blur-2xl">
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-white to-primary animate-pulse" />
-          <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-4 leading-tight">PAGAMENTO PIX</h2>
+          <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-4 leading-tight text-center">PAGAMENTO PIX</h2>
           <p className="text-[10px] text-white/30 font-black tracking-[0.3em] mb-10 uppercase italic">ESCANEIE OU COPIE O CÓDIGO</p>
-          <div className="bg-white p-6 rounded-[3rem] mb-10 w-64 h-64 mx-auto shadow-2xl transition-transform hover:scale-105 duration-500 border-4 border-primary/20">
-            {isPaying ? <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mt-20" /> : <img src={pixData?.pix_qr_code} className="w-full h-full" />}
+          <div className="bg-white p-6 rounded-[3rem] mb-10 w-full aspect-square max-w-[240px] mx-auto shadow-2xl transition-transform hover:scale-105 duration-500 border-4 border-primary/20 flex items-center justify-center">
+            {isPaying ? <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /> : <img src={pixData?.pix_qr_code} className="w-full h-full object-contain" />}
           </div>
-
           <div className="space-y-3 mb-10">
             <div className="bg-zinc-950/50 border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
               <span className="text-[7px] font-black text-white/20 uppercase tracking-widest text-left">Código Pix</span>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-[10px] text-primary font-mono truncate text-left flex-1">{pixData?.pix_copy_paste || '...'}</span>
-                <button
-                  onClick={() => {
-                    if (pixData) {
-                      navigator.clipboard.writeText(pixData.pix_copy_paste);
-                      setPixCopied(true);
-                      setTimeout(() => setPixCopied(false), 2000);
-                    }
-                  }}
-                  className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90",
-                    pixCopied ? "bg-green-500/20 text-green-500 border border-green-500/30" : "bg-primary text-black"
-                  )}
-                >
-                  {pixCopied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-                </button>
+                <button onClick={() => { if (pixData) { navigator.clipboard.writeText(pixData.pix_copy_paste); setPixCopied(true); setTimeout(() => setPixCopied(false), 2000); } }} className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90", pixCopied ? "bg-green-500/20 text-green-500 border border-green-500/30" : "bg-primary text-black")}>{pixCopied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}</button>
               </div>
             </div>
           </div>
-
-          <button
-            onClick={async () => {
-              // Feedback informativo conforme áudio: o usuário permanece na tela
-              alert('O Pix demora no máximo 1 minuto para ser processado. Assim que o pagamento for confirmado, sua tela será atualizada automaticamente ou você poderá ver seus bilhetes no menu.');
-            }}
-            className="w-full bg-primary text-black font-black uppercase py-6 rounded-[2rem] shadow-[0_20px_60px_rgba(250,204,21,0.4)] text-base sm:text-2xl italic active:scale-95 transition-all relative z-[110]"
-          >
-            JÁ PAGUEI!
-          </button>
+          <button onClick={() => alert('O Pix demora no máximo 1 minuto para ser processado. Assim que o pagamento for confirmado, sua tela será atualizada automaticamente ou você poderá ver seus bilhetes no menu.')} className="w-full bg-primary text-black font-black uppercase py-6 rounded-[2rem] shadow-[0_20px_60px_rgba(250,204,21,0.4)] text-base sm:text-2xl italic active:scale-95 transition-all relative z-[110]">JÁ PAGUEI!</button>
         </div>
       </div>
     );
-  }
-
-  if (step === 'SUCCESS') {
-    return (
+  } else if (step === 'SUCCESS') {
+    content = (
       <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-black text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.05),transparent_70%)]" />
-        <div className="w-24 h-24 rounded-[2rem] bg-green-500/20 border border-green-500/40 flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(34,197,94,0.2)] animate-in zoom-in-50 duration-500 relative z-10">
-          <CheckCircle2 className="w-10 h-10 text-green-500" />
-        </div>
+        <div className="w-24 h-24 rounded-[2rem] bg-green-500/20 border border-green-500/40 flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(34,197,94,0.2)] animate-in zoom-in-50 duration-500 relative z-10"><CheckCircle2 className="w-10 h-10 text-green-500" /></div>
         <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase mb-3 leading-none relative z-10">PALPITE REGISTRADO!</h2>
         <p className="text-white/30 mb-12 uppercase text-[9px] font-black tracking-[0.4em] italic relative z-10 px-8">Sua sorte está lançada na Copa Fly</p>
         <div className="space-y-3 w-full max-w-xs relative z-10 px-6">
-          <button onClick={() => router.push('/tickets')} className="w-full bg-primary text-black font-black py-5 rounded-2xl shadow-xl italic tracking-widest text-sm active:scale-95 transition-all group flex items-center justify-center gap-2">
-            VER MEUS BILHETES <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-          <button
-            onClick={() => {
-              localStorage.removeItem('copa_step');
-              localStorage.setItem('copa_selections', JSON.stringify([{}, {}, {}]));
-              setStep('GROUP_1'); setTicketsToBuy(1); setActiveTicketIdx(0); window.scrollTo(0, 0);
-            }}
-            className="w-full bg-white/5 hover:bg-white/10 text-white/20 font-black uppercase py-4 rounded-xl text-[8px] tracking-[0.2em] transition-all italic active:scale-95 border border-white/5"
-          >
-            NOVO PALPITE
-          </button>
+          <button onClick={() => router.push('/tickets')} className="w-full bg-primary text-black font-black py-5 rounded-2xl shadow-xl italic tracking-widest text-sm active:scale-95 transition-all group flex items-center justify-center gap-2">VER MEUS BILHETES <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></button>
+          <button onClick={() => { localStorage.removeItem('copa_step'); localStorage.setItem('copa_selections', JSON.stringify([{}, {}, {}])); setStep('GROUP_1'); setTicketsToBuy(1); setActiveTicketIdx(0); window.scrollTo(0, 0); }} className="w-full bg-white/5 hover:bg-white/10 text-white/20 font-black uppercase py-4 rounded-xl text-[8px] tracking-[0.2em] transition-all italic active:scale-95 border border-white/5">NOVO PALPITE</button>
         </div>
+      </div>
+    );
+  } else {
+    // Default case for when guesses are not locked and it's not a specific step
+    // This covers the renderLiveHome() scenario
+    content = (
+      <div className="min-h-screen bg-black relative">
+        {renderHeader()}
+        <main className="min-h-screen pb-44 flex flex-col relative overflow-x-hidden pt-20">
+          <div className="container mx-auto px-4 flex-1 flex flex-col max-w-lg">
+            {renderLiveHome()}
+          </div>
+        </main>
       </div>
     );
   }
 
+  // --- FINAL RENDER ---
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-primary gap-6">
-      <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
-      <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 animate-pulse italic">Carregando Copa Fly...</span>
+    <div className={cn("min-h-screen bg-black overflow-x-hidden relative", hasExistingTicket && step !== 'SUCCESS' && "overflow-hidden")}>
+      {content}
+
+      {/* Trava de Bilhete Único Overlay */}
+      {hasExistingTicket && step !== 'SUCCESS' && (
+        <div className="fixed inset-0 z-[150] backdrop-blur-md bg-black/60 flex items-center justify-center p-6 animate-in fade-in duration-500">
+          <div className="glass-panel p-8 rounded-[2.5rem] border border-white/10 shadow-3xl text-center max-w-sm">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/20 rotate-12"><ShieldCheck className="w-8 h-8 text-primary" /></div>
+            <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase mb-2">BILHETE JÁ REGISTRADO</h2>
+            <p className="text-white/40 text-[9px] uppercase font-black tracking-[0.2em] leading-relaxed mb-8">O limite é de 01 bilhete por CPF. <br /> Você já possui um palpite ativo!</p>
+            <button onClick={() => router.push('/tickets')} className="w-full bg-primary text-black font-black uppercase py-4 rounded-xl shadow-lg text-xs italic active:scale-95 transition-all">VER MEU BILHETE</button>
+          </div>
+        </div>
+      )}
+
+      {renderTutorial()}
+
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes bounce-x { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+        .animate-bounce-x { animation: bounce-x 1s infinite; }
+        .hide-nav nav { display: none !important; }
+      `}</style>
     </div>
   );
 }
