@@ -177,29 +177,36 @@ export const updateTicketBets = async (ticketId: string, bets: any[]) => {
     if (iError) throw iError;
 };
 export const getTicketById = async (id: string): Promise<Ticket | null> => {
-    const { data, error } = await supabase
+    // 1. Fetch the ticket
+    const { data: ticket, error: tError } = await supabase
         .from('tickets')
-        .select(`
-            *,
-            bets(
-                match_id,
-                selected_team_id
-            )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
-    if (error) {
-        console.error('Error fetching ticket:', error);
+    if (tError) {
+        console.error('Error fetching ticket:', tError);
         return null;
     }
 
+    // 2. Fetch the bets for this ticket
+    const { data: bets, error: bError } = await supabase
+        .from('bets')
+        .select('*')
+        .eq('ticket_id', id);
+
+    if (bError) {
+        console.error('Error fetching bets for ticket:', id, bError);
+    }
+
+    console.log(`Retrieved ticket ${id} with ${bets?.length || 0} bets.`);
+
     return {
-        id: data.id,
-        cpf: data.cpf,
-        status: data.status,
-        createdAt: data.created_at,
-        bets: data.bets.map((b: any) => ({
+        id: ticket.id,
+        cpf: ticket.cpf,
+        status: ticket.status,
+        createdAt: ticket.created_at,
+        bets: (bets || []).map((b: any) => ({
             matchId: b.match_id,
             selectedTeamId: b.selected_team_id
         }))

@@ -48,7 +48,16 @@ export async function POST(req: Request) {
             match_id: b.matchId,
             selected_team_id: b.selectedTeamId
         }));
-        await supabase.from('bets').insert(betsToInsert);
+
+        console.log('Inserting bets for ticket:', ticket.id, JSON.stringify(betsToInsert));
+        const { error: bError } = await supabase.from('bets').insert(betsToInsert);
+
+        if (bError) {
+            console.error('Error inserting bets:', bError);
+            // If bets fail, we should probably delete the ticket to avoid inconsistent state,
+            // but for now let's just throw to stop the process.
+            throw new Error(`Erro ao salvar apostas: ${bError.message}`);
+        }
 
         // 3. Pagarme V5 Order Generation (PIX)
         const genericAddress = {

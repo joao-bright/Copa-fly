@@ -715,21 +715,30 @@ export default function Home() {
       setIsPaying(true);
       try {
         const allBets = selections.slice(0, ticketsToBuy).flatMap((sel, idx) => {
-          const bracket = getBracketTeams(idx);
-          return [...groupMatches.map(m => ({ matchId: m.id, selectedTeamId: sel[m.id] })), { matchId: 'derived_s1', selectedTeamId: sel['derived_s1'] }, { matchId: 'derived_s2', selectedTeamId: sel['derived_s2'] }, { matchId: 'derived_f1', selectedTeamId: sel['derived_f1'] }];
+          const ticketBets = [
+            ...groupMatches.map(m => ({ matchId: m.id, selectedTeamId: sel[m.id] })),
+            { matchId: 'derived_s1', selectedTeamId: sel['derived_s1'] },
+            { matchId: 'derived_s2', selectedTeamId: sel['derived_s2'] },
+            { matchId: 'derived_f1', selectedTeamId: sel['derived_f1'] }
+          ];
+          // Filter out any bets where selectedTeamId is missing
+          return ticketBets.filter(b => b.selectedTeamId);
         });
+
         const customerName = regData.name || localStorage.getItem('copa_user_name') || 'Nome não informado';
         const customerEmail = regData.email || localStorage.getItem('copa_user_email') || 'email@naoinformado.com';
+        const customerPhone = regData.phone || localStorage.getItem('copa_user_phone') || '';
+        const password = regData.password || 'guest';
 
         const res = await fetch('/api/checkout', {
           method: 'POST',
           body: JSON.stringify({
             cpf: userCpf,
             amount: 0.10, // Fixed R$ 0,10
-            customerName: localStorage.getItem('copa_user_name'),
-            customerEmail: localStorage.getItem('copa_user_email'),
-            customerPhone: localStorage.getItem('copa_user_phone')?.replace(/\D/g, '') || '',
-            password: 'guest', // Using generic password if not in localstorage, but it should be
+            customerName,
+            customerEmail,
+            customerPhone: customerPhone.replace(/\D/g, ''),
+            password,
             bets: allBets
           })
         });
@@ -739,25 +748,48 @@ export default function Home() {
     };
     if (!pixData && !isPaying) handleFinalize();
     content = (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-black pt-20 overflow-x-hidden">
+      <div className="min-h-screen bg-black pt-20 pb-10 px-6 overflow-y-auto">
         {renderHeader()}
-        <div className="glass-panel p-10 rounded-[3.5rem] w-full max-sm:px-6 max-w-sm border border-white/10 shadow-3xl text-center relative overflow-hidden animate-in zoom-in-95 backdrop-blur-2xl">
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-white to-primary animate-pulse" />
-          <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-4 leading-tight text-center">PAGAMENTO PIX</h2>
-          <p className="text-[10px] text-white/30 font-black tracking-[0.3em] mb-10 uppercase italic">ESCANEIE OU COPIE O CÓDIGO</p>
-          <div className="bg-white p-6 rounded-[3rem] mb-10 w-full aspect-square max-w-[240px] mx-auto shadow-2xl transition-transform hover:scale-105 duration-500 border-4 border-primary/20 flex items-center justify-center">
-            {isPaying ? <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" /> : <img src={pixData?.pix_qr_code} className="w-full h-full object-contain" />}
-          </div>
-          <div className="space-y-3 mb-10">
-            <div className="bg-zinc-950/50 border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
-              <span className="text-[7px] font-black text-white/20 uppercase tracking-widest text-left">Código Pix</span>
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-[10px] text-primary font-mono truncate text-left flex-1">{pixData?.pix_copy_paste || '...'}</span>
-                <button onClick={() => { if (pixData) { navigator.clipboard.writeText(pixData.pix_copy_paste); setPixCopied(true); setTimeout(() => setPixCopied(false), 2000); } }} className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90", pixCopied ? "bg-green-500/20 text-green-500 border border-green-500/30" : "bg-primary text-black")}>{pixCopied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}</button>
+        <div className="max-w-sm mx-auto flex flex-col items-center gap-8">
+          <div className="glass-panel p-10 rounded-[3.5rem] w-full border border-white/10 shadow-3xl text-center relative overflow-hidden animate-in zoom-in-95 backdrop-blur-2xl">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-white to-primary animate-pulse" />
+            <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-4 leading-tight">PAGAMENTO PIX</h2>
+            <p className="text-[10px] text-white/30 font-black tracking-[0.3em] mb-8 uppercase italic">ESCANEIE OU COPIE O CÓDIGO</p>
+
+            <div className="bg-white p-6 rounded-[3rem] mb-8 w-full aspect-square max-w-[240px] mx-auto shadow-2xl transition-transform hover:scale-105 duration-500 border-4 border-primary/20 flex items-center justify-center">
+              {isPaying ? (
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <img src={pixData?.pix_qr_code} className="w-full h-full object-contain" alt="QR Code Pix" />
+              )}
+            </div>
+
+            <div className="space-y-3 mb-8">
+              <div className="bg-zinc-950/50 border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
+                <span className="text-[7px] font-black text-white/20 uppercase tracking-widest text-left">Código Pix</span>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-[10px] text-primary font-mono truncate text-left flex-1">{pixData?.pix_copy_paste || '...'}</span>
+                  <button
+                    onClick={() => { if (pixData) { navigator.clipboard.writeText(pixData.pix_copy_paste); setPixCopied(true); setTimeout(() => setPixCopied(false), 2000); } }}
+                    className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90", pixCopied ? "bg-green-500/20 text-green-500 border border-green-500/30" : "bg-primary text-black")}
+                  >
+                    {pixCopied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
             </div>
+
+            <button
+              onClick={() => alert('O Pix demora no máximo 1 minuto para ser processado. Assim que o pagamento for confirmado, sua tela será atualizada automaticamente ou você poderá ver seus bilhetes no menu.')}
+              className="w-full bg-primary text-black font-black uppercase py-5 rounded-[2rem] shadow-[0_20px_60px_rgba(250,204,21,0.4)] text-lg italic active:scale-95 transition-all"
+            >
+              JÁ PAGUEI!
+            </button>
           </div>
-          <button onClick={() => alert('O Pix demora no máximo 1 minuto para ser processado. Assim que o pagamento for confirmado, sua tela será atualizada automaticamente ou você poderá ver seus bilhetes no menu.')} className="w-full bg-primary text-black font-black uppercase py-6 rounded-[2rem] shadow-[0_20px_60px_rgba(250,204,21,0.4)] text-base sm:text-2xl italic active:scale-95 transition-all relative z-[110]">JÁ PAGUEI!</button>
+
+          <p className="text-[9px] font-black text-white/10 uppercase tracking-widest italic text-center px-10">
+            Dúvidas? Entre em contato com o suporte através do nosso Instagram oficial.
+          </p>
         </div>
       </div>
     );
