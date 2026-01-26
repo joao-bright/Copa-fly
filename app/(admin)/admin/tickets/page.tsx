@@ -141,7 +141,33 @@ export default function AdminTicketsPage() {
                                                 </div>
                                             </td>
                                             <td className="px-10 py-8">
-                                                <div className="flex justify-end">
+                                                <div className="flex justify-end items-center gap-6">
+                                                    {(t.status === 'ACTIVE' || t.status === 'PENDING') && (
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (confirm(`Deseja realmente reembolsar o bilhete de ${(t as any).customer_name || t.cpf}?`)) {
+                                                                    try {
+                                                                        const res = await fetch('/api/admin/refund', {
+                                                                            method: 'POST',
+                                                                            body: JSON.stringify({ ticketId: t.id })
+                                                                        });
+                                                                        const data = await res.json();
+                                                                        if (data.success) {
+                                                                            alert('Sucesso: O reembolso foi solicitado e o bilhete cancelado.');
+                                                                            window.location.reload();
+                                                                        } else {
+                                                                            alert(`Erro: ${data.error}`);
+                                                                        }
+                                                                    } catch (e) {
+                                                                        alert('Erro ao processar reembolso.');
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className="flex items-center gap-2 text-[10px] font-black text-red-500/40 uppercase tracking-widest hover:text-red-500 transition-colors"
+                                                        >
+                                                            Reembolsar
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => router.push(`/tickets/${t.id}`)}
                                                         className="flex items-center gap-2 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-primary transition-colors group/btn"
