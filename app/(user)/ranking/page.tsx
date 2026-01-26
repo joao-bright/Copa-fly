@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 export default function RankingPage() {
     const router = useRouter();
-    const [leaderBoard, setLeaderBoard] = useState<{ cpf: string, points: number, me: boolean }[]>([]);
+    const [leaderBoard, setLeaderBoard] = useState<{ name: string, cpf: string, points: number, me: boolean }[]>([]);
     const [userCpf, setUserCpf] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -26,25 +26,26 @@ export default function RankingPage() {
             const winnersMap: Record<string, string> = {};
             matches.forEach(m => { if (m.winnerId) winnersMap[m.id] = m.winnerId; });
 
-            const scores: Record<string, number> = {};
+            const scores: Record<string, { points: number, name: string }> = {};
             tickets.forEach(t => {
-                if (!scores[t.cpf]) scores[t.cpf] = 0;
+                if (!scores[t.cpf]) scores[t.cpf] = { points: 0, name: t.customer_name || 'Usuário Fly' };
                 t.bets.forEach((b: any) => {
                     if (winnersMap[b.match_id] === b.selected_team_id) {
-                        scores[t.cpf] += 1;
+                        scores[t.cpf].points += 1;
                     }
                 });
             });
 
             const board = Object.entries(scores)
-                .map(([cpf, points]) => ({
+                .map(([cpf, data]) => ({
+                    name: data.name,
                     cpf: cpf.substring(0, 3) + '.***.***-' + cpf.substring(cpf.length - 2),
                     fullCpf: cpf,
-                    points,
+                    points: data.points,
                     me: cpf === storedCpf
                 }))
                 .sort((a, b) => b.points - a.points)
-                .slice(0, 10);
+                .slice(0, 20);
 
             setLeaderBoard(board as any);
             setLoading(false);
@@ -99,9 +100,10 @@ export default function RankingPage() {
                                     {index + 1}
                                 </div>
                                 <div>
-                                    <span className={cn("text-sm font-bold", user.me ? "text-primary" : "text-white")}>
-                                        {user.cpf}
+                                    <span className={cn("text-sm font-bold uppercase italic", user.me ? "text-primary" : "text-white")}>
+                                        {user.name}
                                     </span>
+                                    <span className="block text-[8px] text-white/20 font-black tracking-widest">{user.cpf}</span>
                                     {user.me && <span className="ml-2 text-[8px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase font-black">Você</span>}
                                 </div>
                             </div>

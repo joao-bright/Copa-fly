@@ -101,7 +101,7 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
                 <button
                     onClick={() => !disabled && onSelect(teamA.id)}
                     className={cn(
-                        "flex-1 flex flex-col items-center gap-4 p-4 rounded-3xl border transition-all duration-500 relative overflow-hidden group/team",
+                        "flex-1 flex flex-col items-center gap-6 p-6 rounded-[2.5rem] border transition-all duration-500 relative overflow-hidden group/team",
                         selection === teamA.id
                             ? "bg-primary/10 border-primary/50 shadow-[0_0_30px_rgba(250,204,21,0.15)] scale-[1.02]"
                             : "bg-zinc-950/50 border-white/5 hover:border-white/10 hover:bg-white/5",
@@ -109,19 +109,19 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
                     )}
                 >
                     <div className={cn(
-                        "w-full aspect-[1792/768] rounded-xl flex items-center justify-center border transition-all duration-500 overflow-hidden bg-black",
+                        "w-full aspect-[1792/768] rounded-2xl flex items-center justify-center border transition-all duration-500 overflow-hidden bg-black",
                         selection === teamA.id ? "border-primary/40 shadow-inner shadow-primary/10" : "border-white/5"
                     )}>
                         {teamA.logoUrl ? (
                             <img src={teamA.logoUrl} className={cn("w-full h-full object-cover transition-transform duration-700", selection === teamA.id && "scale-110")} />
                         ) : (
-                            <span className="text-white/10 font-black text-xs uppercase italic">{teamA.name.substring(0, 3)}</span>
+                            <span className="text-white/10 font-black text-sm uppercase italic">{teamA.name.substring(0, 3)}</span>
                         )}
                     </div>
 
-                    <div className="flex flex-col items-center gap-3">
+                    <div className="flex flex-col items-center gap-4">
                         <span className={cn(
-                            "text-[10px] font-black uppercase tracking-[0.15em] italic transition-colors text-center px-1",
+                            "text-[12px] font-black uppercase tracking-[0.15em] italic transition-colors text-center px-1 leading-tight",
                             selection === teamA.id ? "text-primary" : "text-white/60 group-hover/team:text-white"
                         )}>
                             {teamA.name}
@@ -129,15 +129,15 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
 
                         {/* Selection Circle */}
                         <div className={cn(
-                            "w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500",
+                            "w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-500",
                             selection === teamA.id
                                 ? "bg-primary border-primary shadow-[0_0_15px_rgba(250,204,21,0.5)] rotate-0"
                                 : "bg-black/40 border-white/10 group-hover/team:border-white/20 -rotate-90"
                         )}>
                             {selection === teamA.id ? (
-                                <Check className="w-4 h-4 text-black stroke-[4px]" />
+                                <Check className="w-5 h-5 text-black stroke-[4px]" />
                             ) : (
-                                <div className="w-1.5 h-1.5 bg-white/10 rounded-full group-hover/team:bg-white/20" />
+                                <div className="w-2 h-2 bg-white/10 rounded-full group-hover/team:bg-white/20" />
                             )}
                         </div>
                     </div>
@@ -154,7 +154,7 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
                 <button
                     onClick={() => !disabled && onSelect(teamB.id)}
                     className={cn(
-                        "flex-1 flex flex-col items-center gap-4 p-4 rounded-3xl border transition-all duration-500 relative overflow-hidden group/team",
+                        "flex-1 flex flex-col items-center gap-6 p-6 rounded-[2.5rem] border transition-all duration-500 relative overflow-hidden group/team",
                         selection === teamB.id
                             ? "bg-primary/10 border-primary/50 shadow-[0_0_30px_rgba(250,204,21,0.15)] scale-[1.02]"
                             : "bg-zinc-950/50 border-white/5 hover:border-white/10 hover:bg-white/5",
@@ -162,19 +162,19 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
                     )}
                 >
                     <div className={cn(
-                        "w-full aspect-[1792/768] rounded-xl flex items-center justify-center border transition-all duration-500 overflow-hidden bg-black",
+                        "w-full aspect-[1792/768] rounded-2xl flex items-center justify-center border transition-all duration-500 overflow-hidden bg-black",
                         selection === teamB.id ? "border-primary/40 shadow-inner shadow-primary/10" : "border-white/5"
                     )}>
                         {teamB.logoUrl ? (
                             <img src={teamB.logoUrl} className={cn("w-full h-full object-cover transition-transform duration-700", selection === teamB.id && "scale-110")} />
                         ) : (
-                            <span className="text-white/10 font-black text-xs uppercase italic">{teamB.name.substring(0, 3)}</span>
+                            <span className="text-white/10 font-black text-sm uppercase italic">{teamB.name.substring(0, 3)}</span>
                         )}
                     </div>
 
-                    <div className="flex flex-col items-center gap-3">
+                    <div className="flex flex-col items-center gap-4">
                         <span className={cn(
-                            "text-[10px] font-black uppercase tracking-[0.15em] italic transition-colors text-center px-1",
+                            "text-[12px] font-black uppercase tracking-[0.15em] italic transition-colors text-center px-1 leading-tight",
                             selection === teamB.id ? "text-primary" : "text-white/60 group-hover/team:text-white"
                         )}>
                             {teamB.name}
@@ -182,15 +182,15 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
 
                         {/* Selection Circle */}
                         <div className={cn(
-                            "w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500",
+                            "w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-500",
                             selection === teamB.id
                                 ? "bg-primary border-primary shadow-[0_0_15px_rgba(250,204,21,0.5)] rotate-0"
                                 : "bg-black/40 border-white/10 group-hover/team:border-white/20 -rotate-90"
                         )}>
                             {selection === teamB.id ? (
-                                <Check className="w-4 h-4 text-black stroke-[4px]" />
+                                <Check className="w-5 h-5 text-black stroke-[4px]" />
                             ) : (
-                                <div className="w-1.5 h-1.5 bg-white/10 rounded-full group-hover/team:bg-white/20" />
+                                <div className="w-2 h-2 bg-white/10 rounded-full group-hover/team:bg-white/20" />
                             )}
                         </div>
                     </div>

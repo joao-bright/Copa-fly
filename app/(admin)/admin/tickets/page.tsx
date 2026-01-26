@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Ticket as TicketType } from '@/lib/types';
 import { Ticket as TicketIcon, Search, User, Clock, ShieldCheck, CheckCircle2, ChevronRight, Download, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function AdminTicketsPage() {
+    const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
     const [tickets, setTickets] = useState<TicketType[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -72,7 +74,7 @@ export default function AdminTicketsPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-white/5 bg-white/[0.02]">
-                                <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic">Identificação</th>
+                                <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic">Nome / Identificação</th>
                                 <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic">Status</th>
                                 <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic">Palpites</th>
                                 <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic">Data Registro</th>
@@ -98,8 +100,9 @@ export default function AdminTicketsPage() {
                                                     <User className="w-6 h-6 text-primary/40 group-hover:text-primary transition-colors" />
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-[10px] font-black text-white italic tracking-tight">{t.cpf}</span>
-                                                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">ID: {t.id}</span>
+                                                    <span className="text-[11px] font-black text-white italic tracking-tight">{(t as any).customer_name || 'Usuário Fly'}</span>
+                                                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{t.cpf}</span>
+                                                    <span className="text-[8px] font-black text-primary/20 uppercase tracking-widest italic">{t.id.slice(0, 8)}</span>
                                                 </div>
                                             </div>
                                         </td>
@@ -115,7 +118,7 @@ export default function AdminTicketsPage() {
                                                     <div className="h-1 flex-1 bg-zinc-900 rounded-full overflow-hidden min-w-[100px]">
                                                         <div className="h-full bg-primary" style={{ width: '0%' }} />
                                                     </div>
-                                                    <span className="text-[10px] font-black text-white/20 italic">0/7</span>
+                                                    <span className="text-[10px] font-black text-white/20 italic">0/15</span>
                                                 </div>
                                                 <span className="text-[8px] font-black text-white/10 uppercase tracking-widest">Aguardando Resultados</span>
                                             </div>
@@ -128,7 +131,10 @@ export default function AdminTicketsPage() {
                                         </td>
                                         <td className="px-10 py-8">
                                             <div className="flex justify-end">
-                                                <button className="flex items-center gap-2 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-primary transition-colors group/btn">
+                                                <button
+                                                    onClick={() => router.push(`/tickets/${t.id}`)}
+                                                    className="flex items-center gap-2 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-primary transition-colors group/btn"
+                                                >
                                                     Ver Bilhete <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
                                                 </button>
                                             </div>

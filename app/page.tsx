@@ -218,11 +218,14 @@ export default function Home() {
 
   const renderHeader = () => (
     <header className="fixed top-0 w-full z-[100] glass-panel border-b border-white/10 px-4 py-3 flex justify-between items-center bg-black/95 h-16 shadow-2xl">
-      <div onClick={() => router.push('/')} className="flex items-center gap-2 cursor-pointer">
-        <img src="/logo.jpg" alt="Fly Cup" className="w-10 h-10 object-contain rounded-full border border-primary/20" />
+      <div onClick={() => setStep('GROUP_1')} className="flex items-center gap-3 cursor-pointer group">
+        <div className="relative">
+          <img src="/logo.jpg" alt="Fly Cup" className="w-14 h-14 object-contain rounded-full border-2 border-primary/20 group-hover:border-primary/50 transition-all shadow-[0_0_20px_rgba(250,204,21,0.2)]" />
+          <div className="absolute -bottom-1 -right-1 bg-primary text-black text-[8px] font-black px-1.5 py-0.5 rounded-md italic shadow-lg">FLY</div>
+        </div>
         <div className="flex flex-col">
-          <span className="text-[10px] font-black text-primary italic tracking-tighter leading-none uppercase mb-0.5">Simulador</span>
-          <h1 className="text-lg font-black text-white italic tracking-tighter leading-none uppercase">COPA FLY</h1>
+          <span className="text-[10px] text-primary font-black uppercase tracking-[0.3em] leading-none mb-1 italic">Palpites Especial</span>
+          <h1 className="text-2xl font-black text-white italic tracking-tighter leading-none group-hover:text-primary transition-colors">COPA FLY</h1>
         </div>
       </div>
       {isLoggedIn ? (
@@ -439,9 +442,34 @@ export default function Home() {
         {renderHeader()}
         <main className="min-h-screen pb-44 flex flex-col relative overflow-x-hidden pt-20">
           <div className="container mx-auto px-4 flex-1 flex flex-col max-w-lg">
+            {/* Notice Bar */}
+            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 mb-8 flex items-center justify-center gap-3 animate-pulse">
+              <Lock className="w-4 h-4 text-red-500" />
+              <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic">Palpites Encerrados para esta Copa</span>
+            </div>
             {renderLiveHome()}
           </div>
         </main>
+
+        {/* Navigation for locked state */}
+        <nav className="fixed bottom-0 w-full z-[100] glass-panel border-t border-white/5 bg-black/90 pb-8 pt-4 px-6 flex justify-around items-center">
+          <button onClick={() => router.push('/')} className="flex flex-col items-center gap-1 text-primary">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20"><Radio className="w-5 h-5" /></div>
+            <span className="text-[7px] font-black uppercase tracking-widest italic">Início</span>
+          </button>
+          <button onClick={() => router.push('/live')} className="flex flex-col items-center gap-1 text-white/20 hover:text-white transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-zinc-900 flex items-center justify-center border border-white/5"><Play className="w-5 h-5" /></div>
+            <span className="text-[7px] font-black uppercase tracking-widest italic">Ao Vivo</span>
+          </button>
+          <button onClick={() => router.push('/tickets')} className="flex flex-col items-center gap-1 text-white/20 hover:text-white transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-zinc-900 flex items-center justify-center border border-white/5"><TicketIcon className="w-5 h-5" /></div>
+            <span className="text-[7px] font-black uppercase tracking-widest italic">Bilhetes</span>
+          </button>
+          <button onClick={() => router.push('/ranking')} className="flex flex-col items-center gap-1 text-white/20 hover:text-white transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-zinc-900 flex items-center justify-center border border-white/5"><Trophy className="w-5 h-5" /></div>
+            <span className="text-[7px] font-black uppercase tracking-widest italic">Ranking</span>
+          </button>
+        </nav>
       </div>
     );
   }
@@ -478,12 +506,13 @@ export default function Home() {
 
             <div className="mb-8 flex items-center justify-between px-2">
               <div className="flex flex-col text-left">
-                <p className="text-white/10 text-[6px] font-black uppercase tracking-[0.4em] mb-1 italic">Simulator</p>
-                <h2 className="text-lg sm:text-xl font-black text-white italic tracking-tighter uppercase leading-none truncate">
-                  {step === 'GROUP_1' ? 'Fase de Grupos - R1' :
-                    step === 'GROUP_2' ? 'Fase de Grupos - R2' :
-                      step === 'GROUP_3' ? 'Fase de Grupos - R3' :
-                        step === 'SEMIS' ? 'Semi-Finais' : 'GRANDE FINAL'}
+                <p className="text-white/10 text-[8px] font-black uppercase tracking-[0.4em] mb-1 italic">Simulator</p>
+                <h2 className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter uppercase leading-[0.9] flex flex-col">
+                  <span>{step === 'GROUP_1' ? 'RODADA 01' :
+                    step === 'GROUP_2' ? 'RODADA 02' :
+                      step === 'GROUP_3' ? 'RODADA 03' :
+                        step === 'SEMIS' ? 'SEMI' : 'GRANDE'}</span>
+                  <span className="text-primary not-italic font-sans">{step === 'SEMIS' ? 'FINAIS' : step === 'FINAL' ? 'FINAL' : 'GRUPOS'}</span>
                 </h2>
               </div>
 
@@ -551,7 +580,7 @@ export default function Home() {
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10" />
             </div>
 
-                <style jsx>{`
+            <style jsx>{`
                     .scrollbar-hide::-webkit-scrollbar { display: none; }
                     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
                 `}</style>
@@ -611,7 +640,7 @@ export default function Home() {
                 <span className="text-sm font-black italic leading-none">PAGAR E REGISTRAR</span>
               </div>
               <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-3xl font-black tracking-tightest">R$ {ticketsToBuy === 2 ? '30' : '20'},00</span>
+                <span className="text-3xl font-black tracking-tightest">R$ {ticketsToBuy === 2 ? '0,20' : '0,10'}</span>
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
@@ -690,7 +719,7 @@ export default function Home() {
   }
 
   if (step === 'PAYMENT') {
-    const finalPrice = ticketsToBuy === 1 ? 20 : 30;
+    const finalPrice = ticketsToBuy === 1 ? 0.10 : 0.20;
     const handleFinalize = async () => {
       setIsPaying(true);
       try {

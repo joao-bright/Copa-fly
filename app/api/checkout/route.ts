@@ -21,6 +21,8 @@ export async function POST(req: Request) {
             .from('tickets')
             .insert([{
                 cpf,
+                customer_name: customerName,
+                customer_email: customerEmail,
                 status: 'PENDING',
                 total_price: amount
             }])

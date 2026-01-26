@@ -12,7 +12,7 @@ export default function AdminDashboard() {
     const [guessesLocked, setGuessesLocked] = useState(false);
 
     const fetchData = async () => {
-        const { data: tData } = await supabase.from('tickets').select('*');
+        const { data: tData } = await supabase.from('tickets').select('*').order('created_at', { ascending: false });
         if (tData) setTickets(tData as any);
 
         // Fetch retention and lock status from settings table
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
         document.body.removeChild(link);
     };
 
-    const totalArrecadado = tickets.length * 20;
+    const totalArrecadado = tickets.reduce((acc, t: any) => acc + (t.total_price || 0), 0);
     const valorCasa = (totalArrecadado * houseRetention) / 100;
     const poolPremio = totalArrecadado - valorCasa;
 
@@ -202,18 +202,18 @@ export default function AdminDashboard() {
                 <div className="glass-panel p-10 rounded-[3.5rem] border border-white/5 shadow-2xl bg-gradient-to-br from-white/[0.01] to-transparent">
                     <h3 className="text-xl font-black italic uppercase tracking-tighter mb-8 border-b border-white/5 pb-4">Top Atividades</h3>
                     <div className="space-y-6">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="flex items-center justify-between py-4 border-b border-white/[0.03] last:border-0">
+                        {tickets.slice(0, 5).map(t => (
+                            <div key={t.id} className="flex items-center justify-between py-4 border-b border-white/[0.03] last:border-0">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center">
                                         <TicketIcon className="w-5 h-5 text-primary/40" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-white/60 uppercase tracking-wider leading-none mb-1">Novo Bilhete Registrado</span>
-                                        <span className="text-[9px] font-black text-white/10 uppercase tracking-widest italic">CPF ***.***.***-{i}0</span>
+                                        <span className="text-[10px] font-black text-white/60 uppercase tracking-wider leading-none mb-1">{(t as any).customer_name || 'Novo Bilhete'}</span>
+                                        <span className="text-[9px] font-black text-white/10 uppercase tracking-widest italic">{t.cpf}</span>
                                     </div>
                                 </div>
-                                <span className="text-[10px] font-mono text-white/10">Há {i * 2} min</span>
+                                <span className="text-[10px] font-mono text-white/10">{t.createdAt ? new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}</span>
                             </div>
                         ))}
                     </div>
