@@ -45,32 +45,40 @@ export default function TicketDetails() {
     // We need to figure out who the bracket teams are based on the ticket's group matches
     // But since it's a fixed visualization of the saved picks:
     const selections = ticket.bets.reduce((acc, bet) => {
-        acc[bet.matchId] = bet.selectedTeamId;
+        if (bet.matchId && bet.selectedTeamId) {
+            acc[bet.matchId] = bet.selectedTeamId;
+        }
         return acc;
     }, {} as Record<string, string>);
 
-    // Re-calculate the bracket teams from the group matches in the ticket
-    const standingsA = teams.filter(t => t.group === 'A').map(team => {
-        let pts = 0;
-        ticket.bets.forEach(bet => {
-            const m = matches.find(m => m.id === bet.matchId);
-            if (m && m.group === 'A' && (m.teamA?.id === team.id || m.teamB?.id === team.id)) {
-                if (bet.selectedTeamId === team.id) pts += 3;
-            }
+    const calculateTicketStandings = (group: string) => {
+        const groupTeams = teams.filter(t => t.group === group);
+        const standings = groupTeams.map(team => {
+            let pts = 0;
+            let wins = 0;
+            ticket.bets.forEach(bet => {
+                const m = matches.find(m => m.id === bet.matchId);
+                // Check if the match belongs to this group and the team is part of the match
+                const matchInGroup = m?.group === group || (m && (m.teamA?.id === team.id || m.teamB?.id === team.id));
+                if (m && matchInGroup && (m.teamA?.id === team.id || m.teamB?.id === team.id)) {
+                    if (bet.selectedTeamId === team.id) {
+                        pts += 3;
+                        wins += 1;
+                    }
+                }
+            });
+            return { ...team, points: pts, wins };
         });
-        return { ...team, points: pts };
-    }).sort((a, b) => b.points - a.points);
 
-    const standingsB = teams.filter(t => t.group === 'B').map(team => {
-        let pts = 0;
-        ticket.bets.forEach(bet => {
-            const m = matches.find(m => m.id === bet.matchId);
-            if (m && m.group === 'B' && (m.teamA?.id === team.id || m.teamB?.id === team.id)) {
-                if (bet.selectedTeamId === team.id) pts += 3;
-            }
+        return standings.sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            if (b.wins !== a.wins) return b.wins - a.wins;
+            return a.name.localeCompare(b.name);
         });
-        return { ...team, points: pts };
-    }).sort((a, b) => b.points - a.points);
+    };
+
+    const standingsA = calculateTicketStandings('A');
+    const standingsB = calculateTicketStandings('B');
 
     const bracketTeams = {
         a1: standingsA[0] || null,

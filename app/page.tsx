@@ -770,7 +770,12 @@ export default function Home() {
         <p className="text-white/30 mb-12 uppercase text-[9px] font-black tracking-[0.4em] italic relative z-10 px-8">Sua sorte está lançada na Copa Fly</p>
         <div className="space-y-3 w-full max-w-xs relative z-10 px-6">
           <button onClick={() => router.push('/tickets')} className="w-full bg-primary text-black font-black py-5 rounded-2xl shadow-xl italic tracking-widest text-sm active:scale-95 transition-all group flex items-center justify-center gap-2">VER MEUS BILHETES <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></button>
-          <button onClick={() => { localStorage.removeItem('copa_step'); localStorage.setItem('copa_selections', JSON.stringify([{}, {}, {}])); setStep('GROUP_1'); setTicketsToBuy(1); setActiveTicketIdx(0); window.scrollTo(0, 0); }} className="w-full bg-white/5 hover:bg-white/10 text-white/20 font-black uppercase py-4 rounded-xl text-[8px] tracking-[0.2em] transition-all italic active:scale-95 border border-white/5">NOVO PALPITE</button>
+          <button onClick={() => {
+            localStorage.removeItem('copa_step');
+            localStorage.setItem('copa_selections', JSON.stringify([{}, {}, {}]));
+            setSelections([{}, {}, {}]);
+            setStep('GROUP_1'); setTicketsToBuy(1); setActiveTicketIdx(0); window.scrollTo(0, 0);
+          }} className="w-full bg-white/5 hover:bg-white/10 text-white/20 font-black uppercase py-4 rounded-xl text-[8px] tracking-[0.2em] transition-all italic active:scale-95 border border-white/5">NOVO PALPITE</button>
         </div>
       </div>
     );

@@ -13,8 +13,22 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Copa Fly - Bolão Progressivo',
-  description: 'Faça sua aposta na Copa Fly. Bolão mata-mata de 1 dia.',
+  metadataBase: new URL('https://copafly.com.br'),
+  title: 'Copa Fly',
+  description: 'Faça seus palpites, acompanhe a copa em tempo real e concorra ao acumulado!',
+  openGraph: {
+    title: 'Copa Fly',
+    description: 'Faça seus palpites, acompanhe a copa em tempo real e concorra ao acumulado!',
+    url: 'https://copafly.com.br',
+    siteName: 'Copa Fly',
+    locale: 'pt-BR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Copa Fly',
+    description: 'Faça seus palpites, acompanhe a copa em tempo real e concorra ao acumulado!',
+  },
 };
 
 import Navigation from '@/components/layout/Navigation';

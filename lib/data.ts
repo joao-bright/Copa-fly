@@ -179,7 +179,13 @@ export const updateTicketBets = async (ticketId: string, bets: any[]) => {
 export const getTicketById = async (id: string): Promise<Ticket | null> => {
     const { data, error } = await supabase
         .from('tickets')
-        .select('*, bets(*)')
+        .select(`
+            *,
+            bets(
+                match_id,
+                selected_team_id
+            )
+        `)
         .eq('id', id)
         .single();
 

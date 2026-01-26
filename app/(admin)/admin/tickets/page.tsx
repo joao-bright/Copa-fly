@@ -11,18 +11,20 @@ export default function AdminTicketsPage() {
     const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
     const [tickets, setTickets] = useState<TicketType[]>([]);
+    const [matches, setMatches] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         setIsMounted(true);
         const fetchData = async () => {
-            const { data, error } = await supabase
-                .from('tickets')
-                .select('*')
-                .order('created_at', { ascending: false });
+            const [mRes, tRes] = await Promise.all([
+                supabase.from('matches').select('*'),
+                supabase.from('tickets').select('*, bets(*)').order('created_at', { ascending: false })
+            ]);
 
-            if (data) {
-                const mapped = (data as any[]).map(t => ({
+            if (mRes.data) setMatches(mRes.data);
+            if (tRes.data) {
+                const mapped = (tRes.data as any[]).map(t => ({
                     ...t,
                     createdAt: t.created_at
                 }));
@@ -92,55 +94,65 @@ export default function AdminTicketsPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                filteredTickets.map((t) => (
-                                    <tr key={t.id} className="group hover:bg-white/[0.01] transition-colors">
-                                        <td className="px-10 py-8">
-                                            <div className="flex items-center gap-6">
-                                                <div className="w-12 h-12 bg-zinc-950 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl group-hover:border-primary/20 transition-all">
-                                                    <User className="w-6 h-6 text-primary/40 group-hover:text-primary transition-colors" />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-[11px] font-black text-white italic tracking-tight">{(t as any).customer_name || 'Usuário Fly'}</span>
-                                                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{t.cpf}</span>
-                                                    <span className="text-[8px] font-black text-primary/20 uppercase tracking-widest italic">{t.id.slice(0, 8)}</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-10 py-8">
-                                            <div className="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-full border border-primary/10 w-fit">
-                                                <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                                                <span className="text-[10px] font-black text-primary uppercase tracking-widest italic leading-none">{t.status}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-10 py-8">
-                                            <div className="flex flex-col gap-1.5">
-                                                <div className="flex items-center gap-1.5">
-                                                    <div className="h-1 flex-1 bg-zinc-900 rounded-full overflow-hidden min-w-[100px]">
-                                                        <div className="h-full bg-primary" style={{ width: '0%' }} />
+                                filteredTickets.map((t) => {
+                                    const currentHits = t.bets?.reduce((acc: number, b: any) => {
+                                        const m = matches.find(match => match.id === b.match_id);
+                                        if (m && m.winnerId && m.winnerId === b.selected_team_id) return acc + 1;
+                                        return acc;
+                                    }, 0) || 0;
+
+                                    return (
+                                        <tr key={t.id} className="group hover:bg-white/[0.01] transition-colors">
+                                            <td className="px-10 py-8">
+                                                <div className="flex items-center gap-6">
+                                                    <div className="w-12 h-12 bg-zinc-950 rounded-2xl flex items-center justify-center border border-white/5 shadow-xl group-hover:border-primary/20 transition-all">
+                                                        <User className="w-6 h-6 text-primary/40 group-hover:text-primary transition-colors" />
                                                     </div>
-                                                    <span className="text-[10px] font-black text-white/20 italic">0/15</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[11px] font-black text-white italic tracking-tight">{(t as any).customer_name || 'Usuário Fly'}</span>
+                                                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{t.cpf}</span>
+                                                        <span className="text-[8px] font-black text-primary/20 uppercase tracking-widest italic">{t.id.slice(0, 8)}</span>
+                                                    </div>
                                                 </div>
-                                                <span className="text-[8px] font-black text-white/10 uppercase tracking-widest">Aguardando Resultados</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-10 py-8">
-                                            <div className="flex items-center gap-3">
-                                                <Clock className="w-3.5 h-3.5 text-white/10" />
-                                                <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">{new Date(t.createdAt).toLocaleDateString()}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-10 py-8">
-                                            <div className="flex justify-end">
-                                                <button
-                                                    onClick={() => router.push(`/tickets/${t.id}`)}
-                                                    className="flex items-center gap-2 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-primary transition-colors group/btn"
-                                                >
-                                                    Ver Bilhete <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                            </td>
+                                            <td className="px-10 py-8">
+                                                <div className="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-full border border-primary/10 w-fit">
+                                                    <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                                                    <span className="text-[10px] font-black text-primary uppercase tracking-widest italic leading-none">{t.status}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-8">
+                                                <div className="flex flex-col gap-1.5">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <div className="h-1 flex-1 bg-zinc-900 rounded-full overflow-hidden min-w-[100px]">
+                                                            <div className="h-full bg-primary" style={{ width: `${(currentHits / 15) * 100}%` }} />
+                                                        </div>
+                                                        <span className="text-[10px] font-black text-white/20 italic">{currentHits}/15</span>
+                                                    </div>
+                                                    <span className="text-[8px] font-black text-white/10 uppercase tracking-widest">
+                                                        {currentHits > 0 ? 'Palpites Certos' : 'Aguardando Resultados'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-8">
+                                                <div className="flex items-center gap-3">
+                                                    <Clock className="w-3.5 h-3.5 text-white/10" />
+                                                    <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">{new Date(t.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-8">
+                                                <div className="flex justify-end">
+                                                    <button
+                                                        onClick={() => router.push(`/tickets/${t.id}`)}
+                                                        className="flex items-center gap-2 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-primary transition-colors group/btn"
+                                                    >
+                                                        Ver Bilhete <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
