@@ -272,25 +272,32 @@ export default function Home() {
   };
 
   const renderHeader = () => (
-    <header className="fixed top-0 w-full z-[100] glass-panel border-b border-white/10 px-4 py-3 flex justify-between items-center bg-black/95 h-16 shadow-2xl">
-      <div onClick={() => setStep('GROUP_1')} className="flex items-center gap-3 cursor-pointer group">
-        <div className="relative">
-          <img src="/logo.jpg" alt="Fly Cup" className="w-14 h-14 object-contain rounded-full border-2 border-primary/20 group-hover:border-primary/50 transition-all shadow-[0_0_20px_rgba(250,204,21,0.2)]" />
+    <header className="fixed top-0 w-full z-[100] glass-panel border-b border-white/10 px-4 py-3 bg-black/95 h-20 shadow-2xl overflow-hidden">
+      <div className="container mx-auto h-full flex items-center justify-between relative max-w-lg">
+        {/* Left: Title */}
+        <div onClick={() => setStep('GROUP_1')} className="flex flex-col cursor-pointer group z-10">
+          <span className="text-[8px] text-primary font-black uppercase tracking-[0.3em] font-mono leading-none mb-1 italic">Palpites</span>
+          <h1 className="text-xl font-black text-white italic tracking-tighter leading-none group-hover:text-primary transition-colors">COPA FLY</h1>
         </div>
-        <div className="flex flex-col">
-          <span className="text-[10px] text-primary font-black uppercase tracking-[0.3em] leading-none mb-1 italic">Palpites Especial</span>
-          <h1 className="text-2xl font-black text-white italic tracking-tighter leading-none group-hover:text-primary transition-colors">COPA FLY</h1>
+
+        {/* Center: Logo */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+          <img src="/logo.jpg" alt="Fly Cup" className="w-16 h-16 object-contain rounded-full opacity-100" />
+        </div>
+
+        {/* Right: Action */}
+        <div className="z-10">
+          {isLoggedIn ? (
+            <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="flex items-center gap-2 bg-zinc-900 border border-white/5 py-2 px-4 rounded-xl text-[10px] font-black uppercase text-red-500/60 hover:text-red-500 transition-all active:scale-95">
+              <LogOut className="w-4 h-4" /> SAIR
+            </button>
+          ) : (
+            <button onClick={() => router.push('/login')} className="flex items-center gap-2 bg-zinc-900 border border-white/5 py-2.5 px-5 rounded-2xl text-[10px] font-black uppercase text-white/40 hover:text-white transition-all active:scale-95 shadow-lg">
+              <LogIn className="w-4 h-4 text-primary" /> ENTRAR
+            </button>
+          )}
         </div>
       </div>
-      {isLoggedIn ? (
-        <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="flex items-center gap-1.5 bg-zinc-900 border border-white/5 py-1.5 px-3 rounded-full text-[9px] font-black uppercase text-red-500/60 hover:text-red-500 transition-all active:scale-95">
-          <LogOut className="w-3 h-3" /> Sair
-        </button>
-      ) : (
-        <button onClick={() => router.push('/login')} className="flex items-center gap-1.5 bg-zinc-900 border border-white/5 py-1.5 px-3 rounded-full text-[9px] font-black uppercase text-white/40 hover:text-white transition-all active:scale-95 shadow-lg">
-          <LogIn className="w-3 h-3 text-primary" /> Entrar
-        </button>
-      )}
     </header>
   );
 
