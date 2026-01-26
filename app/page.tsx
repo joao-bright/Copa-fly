@@ -32,7 +32,7 @@ export default function Home() {
   const [step, setStep] = useState<FlowStep>('GROUP_1');
   const [ticketsToBuy, setTicketsToBuy] = useState(1);
   const [activeTicketIdx, setActiveTicketIdx] = useState(0);
-  const [selections, setSelections] = useState<Record<string, string>[]>([{}, {}]);
+  const [selections, setSelections] = useState<Record<string, string>[]>([{}, {}, {}]);
   const [regData, setRegData] = useState({ name: '', cpf: '', email: '', password: '' });
   const [regError, setRegError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -46,6 +46,15 @@ export default function Home() {
   const [pixCopied, setPixCopied] = useState(false);
   const [guessesLocked, setGuessesLocked] = useState(false);
   const [userGuesses, setUserGuesses] = useState<Record<string, string> | null>(null);
+
+  useEffect(() => {
+    if (step === 'PAYMENT' || step === 'SUCCESS' || step === 'REGISTER') {
+      document.body.classList.add('hide-nav');
+    } else {
+      document.body.classList.remove('hide-nav');
+    }
+    return () => document.body.classList.remove('hide-nav');
+  }, [step]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -199,7 +208,9 @@ export default function Home() {
     else if (step === 'SEMIS') setStep('FINAL');
     else if (step === 'FINAL') {
       if (activeTicketIdx === 0 && ticketsToBuy === 1) setStep('UPSELL');
+      else if (activeTicketIdx === 1 && ticketsToBuy === 2) setStep('UPSELL'); // Offer 3rd ticket
       else if (activeTicketIdx === 0 && ticketsToBuy === 2) { setActiveTicketIdx(1); setStep('GROUP_1'); }
+      else if (activeTicketIdx === 1 && ticketsToBuy === 3) { setActiveTicketIdx(2); setStep('GROUP_1'); }
       else if (isLoggedIn) setStep('SUMMARY');
       else setStep('REGISTER');
     }
@@ -211,8 +222,15 @@ export default function Home() {
     else if (step === 'GROUP_3') setStep('GROUP_2');
     else if (step === 'SEMIS') setStep('GROUP_3');
     else if (step === 'FINAL') setStep('SEMIS');
-    else if (step === 'UPSELL') setStep('FINAL');
-    else if (step === 'REGISTER') { if (ticketsToBuy === 2) setStep('FINAL'); else setStep('UPSELL'); }
+    else if (step === 'UPSELL') {
+      if (ticketsToBuy === 1) setStep('FINAL');
+      else if (ticketsToBuy === 2) { setStep('FINAL'); setActiveTicketIdx(1); } // Return to 2nd ticket finalization
+    }
+    else if (step === 'REGISTER') {
+      if (ticketsToBuy === 3) setStep('FINAL');
+      else if (ticketsToBuy === 2) setStep('FINAL');
+      else setStep('UPSELL');
+    }
     else if (step === 'SUMMARY') { if (!isLoggedIn) setStep('REGISTER'); else setStep('FINAL'); }
   };
 
@@ -476,10 +494,10 @@ export default function Home() {
           <div className="container mx-auto px-4 flex-1 flex flex-col max-w-lg">
             {renderProgress()}
 
-            {ticketsToBuy === 2 && (
-              <div className="flex items-center gap-2 mb-2 px-2">
+            {ticketsToBuy > 1 && (
+              <div className="flex items-center gap-2 mb-2 px-2 overflow-x-auto scrollbar-hide">
                 <div className={cn(
-                  "px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest italic flex items-center gap-2",
+                  "px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest italic flex items-center gap-2 whitespace-nowrap",
                   activeTicketIdx === 0 ? "bg-primary text-black border-primary" : "bg-zinc-900 text-white/20 border-white/5"
                 )}>
                   {activeTicketIdx === 0 ? <TicketIcon className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5 text-primary" />}
@@ -487,12 +505,24 @@ export default function Home() {
                 </div>
                 <div className="w-4 h-[1px] bg-white/5" />
                 <div className={cn(
-                  "px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest italic flex items-center gap-2",
+                  "px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest italic flex items-center gap-2 whitespace-nowrap",
                   activeTicketIdx === 1 ? "bg-primary text-black border-primary" : "bg-zinc-900 text-white/20 border-white/5"
                 )}>
-                  <Sparkles className="w-2.5 h-2.5" />
-                  BILHETE 02 {activeTicketIdx === 1 && "EM PROGRESSO"}
+                  {activeTicketIdx === 1 ? <Sparkles className="w-2.5 h-2.5" /> : activeTicketIdx > 1 ? <CheckCircle2 className="w-2.5 h-2.5 text-primary" /> : <TicketIcon className="w-2.5 h-2.5" />}
+                  BILHETE 02 {activeTicketIdx === 1 ? "EM PROGRESSO" : activeTicketIdx > 1 ? "CONCLUÍDO" : ""}
                 </div>
+                {ticketsToBuy === 3 && (
+                  <>
+                    <div className="w-4 h-[1px] bg-white/5" />
+                    <div className={cn(
+                      "px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest italic flex items-center gap-2 whitespace-nowrap",
+                      activeTicketIdx === 2 ? "bg-primary text-black border-primary" : "bg-zinc-900 text-white/20 border-white/5"
+                    )}>
+                      <Zap className="w-2.5 h-2.5" />
+                      BILHETE 03 {activeTicketIdx === 2 && "ULTRA FOCO"}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
@@ -630,7 +660,7 @@ export default function Home() {
           </div>
 
           <div className="space-y-10 w-full max-w-md mb-16 relative z-10">
-            {[0, 1].map(ticketIdx => {
+            {[0, 1, 2].map(ticketIdx => {
               if (ticketIdx >= ticketsToBuy) return null;
               const standingsA = calculateStandings('A', ticketIdx);
               const standingsB = calculateStandings('B', ticketIdx);
@@ -666,7 +696,7 @@ export default function Home() {
                 <span className="text-sm font-black italic leading-none">PAGAR E REGISTRAR</span>
               </div>
               <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-3xl font-black tracking-tightest">R$ {ticketsToBuy === 2 ? '0,20' : '0,10'}</span>
+                <span className="text-3xl font-black tracking-tightest">R$ {ticketsToBuy === 1 ? '0,10' : ticketsToBuy === 2 ? '0,15' : '0,20'}</span>
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
@@ -678,21 +708,43 @@ export default function Home() {
 
   // --- UPSELL STEP ---
   if (step === 'UPSELL') {
+    const isUpsell2 = ticketsToBuy === 2;
     return (
       <main className="min-h-screen flex items-center justify-center p-6 bg-black relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-96 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.08),transparent_70%)] pointer-events-none" />
         <div className="w-full max-w-sm glass-panel p-10 rounded-[2.5rem] border border-white/10 z-10 text-center animate-in zoom-in-95 shadow-[0_40px_100px_rgba(0,0,0,0.8)] transition-all relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-          <Trophy className="w-16 h-16 text-primary mx-auto mb-8 animate-bounce mt-4 drop-shadow-[0_0_20px_rgba(250,204,21,0.4)]" />
-          <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-[0.85] mb-4">SORTE EM<br /><span className="text-primary not-italic">DOBRO?</span></h2>
-          <p className="text-white/40 text-[10px] uppercase font-black tracking-[0.2em] mb-12 px-4 leading-relaxed italic">ADICIONE O 2º BILHETE COM <span className="text-primary italic">50% DESC</span> E TENHA 2X MAIS CHANCES!</p>
+
+          <button
+            onClick={() => handleBack()}
+            className="absolute top-6 left-6 w-10 h-10 rounded-full border border-white/5 flex items-center justify-center text-white/20 hover:text-white transition-all bg-black/40"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          <Trophy className={cn("w-16 h-16 text-primary mx-auto mb-8 animate-bounce mt-4 drop-shadow-[0_0_20px_rgba(250,204,21,0.4)]", isUpsell2 && "text-amber-400")} />
+          <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-[0.85] mb-4">
+            {isUpsell2 ? "CHANCE" : "SORTE EM"}<br />
+            <span className="text-primary not-italic">{isUpsell2 ? "TRIPLA!" : "DOBRO?"}</span>
+          </h2>
+          <p className="text-white/40 text-[10px] uppercase font-black tracking-[0.2em] mb-12 px-4 leading-relaxed italic">
+            {isUpsell2
+              ? "ADICIONE O 3º BILHETE POR APENAS R$ 0,05 E DOMINE O RANKING!"
+              : "ADICIONE O 2º BILHETE COM 50% DESC E TENHA 2X MAIS CHANCES!"}
+          </p>
 
           <div className="space-y-6">
             <button
-              onClick={() => { setTicketsToBuy(2); setActiveTicketIdx(1); setStep('GROUP_1'); }}
+              onClick={() => {
+                if (isUpsell2) {
+                  setTicketsToBuy(3); setActiveTicketIdx(2); setStep('GROUP_1');
+                } else {
+                  setTicketsToBuy(2); setActiveTicketIdx(1); setStep('GROUP_1');
+                }
+              }}
               className="w-full bg-primary text-black font-black italic uppercase py-6 rounded-2xl shadow-[0_15px_40px_rgba(250,204,21,0.3)] text-xl flex items-center justify-center gap-3 active:scale-95 transition-all group"
             >
-              QUERO 2 BILHETES <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              QUERO {isUpsell2 ? '3' : '2'} BILHETES <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </button>
 
             <div className="relative flex items-center justify-center">
@@ -701,10 +753,10 @@ export default function Home() {
             </div>
 
             <button
-              onClick={() => { setTicketsToBuy(1); if (isLoggedIn) setStep('SUMMARY'); else setStep('REGISTER'); }}
+              onClick={() => { if (isLoggedIn) setStep('SUMMARY'); else setStep('REGISTER'); }}
               className="w-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/40 hover:text-white font-black uppercase py-4 rounded-xl text-[10px] tracking-widest transition-all italic active:scale-95"
             >
-              SEGUIR COM APENAS 1
+              SEGUIR COM {ticketsToBuy} {ticketsToBuy === 1 ? 'BILHETE' : 'BILHETES'}
             </button>
           </div>
         </div>
@@ -773,7 +825,7 @@ export default function Home() {
   }
 
   if (step === 'PAYMENT') {
-    const finalPrice = ticketsToBuy === 1 ? 1.00 : 2.00;
+    const finalPrice = ticketsToBuy === 1 ? 0.10 : ticketsToBuy === 2 ? 0.15 : 0.20;
     const handleFinalize = async () => {
       setIsPaying(true);
       try {
@@ -848,7 +900,13 @@ export default function Home() {
                 const sel = selections[i];
                 const standingsA = calculateStandings('A', i);
                 const standingsB = calculateStandings('B', i);
-                await saveTicket({ cpf: userCpf, status: 'ACTIVE', total_price: finalPrice }, [
+                await saveTicket({
+                  cpf: userCpf,
+                  status: 'PENDING', // Enhanced: mark as pending until webhook confirmation
+                  total_price: finalPrice,
+                  customer_email: regData.email || localStorage.getItem('copa_user_email') || '',
+                  password: regData.password || ''
+                }, [
                   ...groupMatches.map(m => ({ matchId: m.id, selectedTeamId: sel[m.id] })),
                   { matchId: 'derived_s1', selectedTeamId: sel['derived_s1'] },
                   { matchId: 'derived_s2', selectedTeamId: sel['derived_s2'] },
@@ -878,7 +936,7 @@ export default function Home() {
             VER MEUS BILHETES <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
           </button>
           <button
-            onClick={() => { setStep('GROUP_1'); window.scrollTo(0, 0); }}
+            onClick={() => { setStep('GROUP_1'); setTicketsToBuy(1); setActiveTicketIdx(0); window.scrollTo(0, 0); }}
             className="w-full bg-white/5 hover:bg-white/10 text-white/40 font-black uppercase py-4 rounded-2xl text-[10px] tracking-[0.3em] transition-all italic active:scale-95 border border-white/5"
           >
             FAZER NOVO PALPITE

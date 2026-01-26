@@ -70,6 +70,15 @@ export async function POST(req: Request) {
                         quantity: 1
                     }
                 ],
+                shipping: {
+                    address: {
+                        line_1: 'Avenida Paulista, 1000',
+                        zip_code: '01311000',
+                        city: 'São Paulo',
+                        state: 'SP',
+                        country: 'BR'
+                    }
+                },
                 payments: [
                     {
                         payment_method: 'pix',

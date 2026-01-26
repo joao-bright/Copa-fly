@@ -65,7 +65,7 @@ export default function RankingPage() {
                 <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-outfit)]">Ranking Top 10</h1>
             </div>
 
-            <div className="glass-panel rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+            <div className="glass-panel rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative">
                 <div className="bg-primary/20 p-6 flex items-center justify-between border-b border-primary/20">
                     <div className="flex items-center gap-3">
                         <Trophy className="text-primary w-8 h-8" />
@@ -100,11 +100,11 @@ export default function RankingPage() {
                                     {index + 1}
                                 </div>
                                 <div>
-                                    <span className={cn("text-sm font-bold uppercase italic", user.me ? "text-primary" : "text-white")}>
-                                        {user.name}
+                                    <span className="text-sm font-bold uppercase italic text-white/40">
+                                        Palpiteiro #{index + 1}
                                     </span>
-                                    <span className="block text-[8px] text-white/20 font-black tracking-widest">{user.cpf}</span>
-                                    {user.me && <span className="ml-2 text-[8px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase font-black">Você</span>}
+                                    <span className="block text-[8px] text-primary font-black tracking-widest">{user.cpf}</span>
+                                    {user.me && <span className="text-[8px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase font-black">Você</span>}
                                 </div>
                             </div>
 

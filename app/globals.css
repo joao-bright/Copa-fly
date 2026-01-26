@@ -33,6 +33,11 @@
   --font-outfit: var(--font-outfit);
 }
 
+/* Navigation Helper */
+body.hide-nav nav {
+  display: none !important;
+}
+
 @layer base {
 
   *,

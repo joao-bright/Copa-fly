@@ -69,13 +69,13 @@ export default function LivePage() {
             isLive ? "border-red-500/20 shadow-red-500/5 bg-red-500/[0.02]" : "border-white/10 hover:border-primary/30"
         )}>
             {isLive && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 py-2 px-4 bg-red-500/10 border border-red-500/20 rounded-full flex items-center gap-2 z-20">
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 py-1.5 px-3 bg-red-500/10 border border-red-500/20 rounded-full flex items-center gap-2 z-20">
                     <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                    <span className="text-[8px] font-black text-red-500 uppercase tracking-[0.2em] italic">AO VIVO</span>
+                    <span className="text-[7px] font-black text-red-500 uppercase tracking-[0.2em] italic">AO VIVO</span>
                 </div>
             )}
 
-            <div className="flex justify-between items-center mb-6 relative z-10">
+            <div className="flex justify-between items-center mb-6 relative z-10 mt-2">
                 <span className="text-white/20 text-[7px] font-black uppercase tracking-[0.3em] italic">
                     {m.phase === 'FINAL' ? 'Grande Final' : m.phase === 'SEMI' ? 'Semi-final' : `Grupo ${m.group} - Rodada ${m.round}`}
                 </span>
