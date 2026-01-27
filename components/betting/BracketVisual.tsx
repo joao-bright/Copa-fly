@@ -27,19 +27,15 @@ export default function BracketVisual({ selections, bracket, standingsA, standin
     let s2WinnerId = selections['derived_s2'];
     let finalWinnerId = selections['derived_f1'];
 
-    if (matches) {
-        const semi1 = matches.find(m => m.phase === 'SEMI' && (m.startTime === '14:00' || (m.teamA?.id === bracket.a1?.id && m.teamB?.id === bracket.b2?.id)));
-        const semi2 = matches.find(m => m.phase === 'SEMI' && (m.startTime === '15:00' || (m.teamA?.id === bracket.b1?.id && m.teamB?.id === bracket.a2?.id)));
-        const finalMatchReal = matches.find(m => m.phase === 'FINAL');
-
-        if (semi1 && selections[semi1.id]) s1WinnerId = selections[semi1.id];
-        if (semi2 && selections[semi2.id]) s2WinnerId = selections[semi2.id];
-        if (finalMatchReal && selections[finalMatchReal.id]) finalWinnerId = selections[finalMatchReal.id];
-    }
-
-    const s1Record = matches?.find(m => m.phase === 'SEMI' && (m.startTime === '14:00' || (m.teamA?.id === bracket.a1?.id && m.teamB?.id === bracket.b2?.id)));
-    const s2Record = matches?.find(m => m.phase === 'SEMI' && (m.startTime === '15:00' || (m.teamA?.id === bracket.b1?.id && m.teamB?.id === bracket.a2?.id)));
+    const s1Record = matches?.find(m => m.phase === 'SEMI' && (m.startTime === '14:00' || m.startTime === '12:00'));
+    const s2Record = matches?.find(m => m.phase === 'SEMI' && (m.startTime === '15:00' || m.startTime === '13:00'));
     const finalRecord = matches?.find(m => m.phase === 'FINAL');
+
+    if (matches) {
+        if (s1Record && selections[s1Record.id]) s1WinnerId = selections[s1Record.id];
+        if (s2Record && selections[s2Record.id]) s2WinnerId = selections[s2Record.id];
+        if (finalRecord && selections[finalRecord.id]) finalWinnerId = selections[finalRecord.id];
+    }
 
     const s1WinnerIdResolved = (s1Record?.status !== 'SCHEDULED' && s1Record?.winnerId) ? s1Record.winnerId : s1WinnerId;
     const s2WinnerIdResolved = (s2Record?.status !== 'SCHEDULED' && s2Record?.winnerId) ? s2Record.winnerId : s2WinnerId;

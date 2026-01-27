@@ -56,15 +56,15 @@ export default function TicketDetails() {
         const standings = groupTeams.map(team => {
             let pts = 0;
             let wins = 0;
-            ticket.bets.forEach(bet => {
-                const m = matches.find(m => m.id === bet.matchId);
-                // Check if the match belongs to this group and the team is part of the match
-                const matchInGroup = m?.group === group || (m && (m.teamA?.id === team.id || m.teamB?.id === team.id));
-                if (m && matchInGroup && (m.teamA?.id === team.id || m.teamB?.id === team.id)) {
-                    if (bet.selectedTeamId === team.id) {
-                        pts += 3;
-                        wins += 1;
-                    }
+
+            // Only count GROUP matches for points
+            const groupMatchesInDB = matches.filter(m => m.phase === 'GROUP' && m.group === group);
+
+            groupMatchesInDB.forEach(m => {
+                const bet = ticket.bets.find(b => b.matchId === m.id);
+                if (bet && bet.selectedTeamId === team.id) {
+                    pts += 3;
+                    wins += 1;
                 }
             });
             return { ...team, points: pts, wins };
@@ -97,9 +97,31 @@ export default function TicketDetails() {
 
         const renderMatchRow = (m: Match, label: string) => {
             const selectedId = selections[m.id];
-            const isTeamASelected = m.teamA?.id === selectedId;
-            const isTeamBSelected = m.teamB?.id === selectedId;
             const winnerId = m.winnerId;
+
+            // FOR SEMIS AND FINALS: If teamA/teamB are null in the match record,
+            // we use the derived teams from the bracketTeams/selections
+            let displayTeamA = m.teamA;
+            let displayTeamB = m.teamB;
+
+            if (m.phase === 'SEMI') {
+                const isSemi1 = m.startTime === '14:00' || m.startTime === '12:00'; // Add flexibility
+                if (!displayTeamA) displayTeamA = isSemi1 ? bracketTeams.a1 : bracketTeams.b1;
+                if (!displayTeamB) displayTeamB = isSemi1 ? bracketTeams.b2 : bracketTeams.a2;
+            } else if (m.phase === 'FINAL') {
+                if (!displayTeamA || !displayTeamB) {
+                    const s1Match = matches.find(mh => mh.phase === 'SEMI' && (mh.startTime === '14:00' || mh.startTime === '12:00'));
+                    const s2Match = matches.find(mh => mh.phase === 'SEMI' && (mh.startTime === '15:00' || mh.startTime === '13:00'));
+                    const s1WinnerId = selections[s1Match?.id || ''];
+                    const s2WinnerId = selections[s2Match?.id || ''];
+
+                    if (!displayTeamA) displayTeamA = teams.find(t => t.id === s1WinnerId) || null;
+                    if (!displayTeamB) displayTeamB = teams.find(t => t.id === s2WinnerId) || null;
+                }
+            }
+
+            const isTeamASelected = displayTeamA?.id === selectedId;
+            const isTeamBSelected = displayTeamB?.id === selectedId;
 
             return (
                 <div key={m.id} className="flex flex-col gap-3 py-4 border-b border-white/[0.03] last:border-0 group">
@@ -115,13 +137,13 @@ export default function TicketDetails() {
                             isTeamASelected ? "bg-primary/10 border-primary/30" : "bg-zinc-900/30 border-white/5"
                         )}>
                             <div className="w-6 h-6 rounded-lg bg-black flex items-center justify-center border border-white/5">
-                                {m.teamA?.logoUrl ? <img src={m.teamA.logoUrl} className="w-4 h-4 object-contain" /> : <ShieldCheck className="w-3 h-3 text-white/10" />}
+                                {displayTeamA?.logoUrl ? <img src={displayTeamA.logoUrl} className="w-4 h-4 object-contain" /> : <ShieldCheck className="w-3 h-3 text-white/10" />}
                             </div>
                             <span className={cn(
                                 "text-[10px] font-black uppercase italic tracking-tighter truncate",
                                 isTeamASelected ? "text-primary" : "text-white/40"
                             )}>
-                                {m.teamA?.name}
+                                {displayTeamA?.name || '?'}
                             </span>
                         </div>
 
@@ -133,13 +155,13 @@ export default function TicketDetails() {
                             isTeamBSelected ? "bg-primary/10 border-primary/30" : "bg-zinc-900/30 border-white/5"
                         )}>
                             <div className="w-6 h-6 rounded-lg bg-black flex items-center justify-center border border-white/5">
-                                {m.teamB?.logoUrl ? <img src={m.teamB.logoUrl} className="w-4 h-4 object-contain" /> : <ShieldCheck className="w-3 h-3 text-white/10" />}
+                                {displayTeamB?.logoUrl ? <img src={displayTeamB.logoUrl} className="w-4 h-4 object-contain" /> : <ShieldCheck className="w-3 h-3 text-white/10" />}
                             </div>
                             <span className={cn(
                                 "text-[10px] font-black uppercase italic tracking-tighter truncate",
                                 isTeamBSelected ? "text-primary" : "text-white/40"
                             )}>
-                                {m.teamB?.name}
+                                {displayTeamB?.name || '?'}
                             </span>
                         </div>
                     </div>
