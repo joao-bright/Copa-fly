@@ -13,17 +13,24 @@ interface GameCardProps {
 }
 
 export default function GameCard({ match, selection, onSelect, disabled, isVertical }: GameCardProps) {
-    const { teamA, teamB } = match;
+    const { teamA, teamB, status, winnerId, scoreA, scoreB } = match;
 
     if (!teamA || !teamB) return null;
+
+    const isFinished = status === 'FINISHED';
+    const isLive = status === 'LIVE';
+    const isLocked = disabled || isFinished || isLive;
 
     if (isVertical) {
         return (
             <div className="relative w-full glass-panel rounded-2xl p-2.5 mb-4 border border-white/5 shadow-xl overflow-hidden group/card transition-all">
                 {/* Minimal Header */}
                 <div className="flex justify-between items-center text-[6px] uppercase font-black text-white/20 mb-2.5 tracking-widest italic relative z-10">
-                    <span className="flex items-center gap-1"><div className="w-1 h-1 bg-primary rounded-full animate-pulse" /> {match.phase === 'GROUP' ? `R${match.round}` : match.phase}</span>
-                    <span className="bg-white/5 px-1.5 py-0.5 rounded-full border border-white/10">{match.startTime}</span>
+                    <span className="flex items-center gap-1">
+                        <div className={cn("w-1 h-1 rounded-full animate-pulse", isLive ? "bg-red-500" : isFinished ? "bg-white/20" : "bg-primary")} />
+                        {isLive ? 'AO VIVO' : isFinished ? 'ENCERRADO' : match.phase === 'GROUP' ? `R${match.round}` : match.phase}
+                    </span>
+                    <span className="bg-white/5 px-1.5 py-0.5 rounded-full border border-white/10">{isLive || isFinished ? `${scoreA ?? 0} x ${scoreB ?? 0}` : match.startTime}</span>
                 </div>
 
                 <div className="flex flex-col gap-2 relative z-10">
@@ -87,11 +94,11 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
             {/* Header (Phase/Time) */}
             <div className="flex justify-between items-center text-[8px] uppercase font-black text-white/20 mb-6 tracking-[0.3em] italic relative z-10">
                 <div className="flex items-center gap-2">
-                    <div className="w-1 h-1 bg-primary rounded-full animate-pulse" />
-                    <span>{match.phase === 'GROUP' ? `Grupo ${match.group} - Rodada ${match.round}` : match.phase}</span>
+                    <div className={cn("w-1 h-1 rounded-full animate-pulse", isLive ? "bg-red-500" : isFinished ? "bg-white/20" : "bg-primary")} />
+                    <span>{isLive ? 'PARTIDA AO VIVO' : isFinished ? 'RESULTADO FINAL' : match.phase === 'GROUP' ? `Grupo ${match.group} - Rodada ${match.round}` : match.phase}</span>
                 </div>
                 <div className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
-                    <span className="text-white/40">{match.startTime}</span>
+                    <span className="text-white/40">{isLive || isFinished ? `${scoreA ?? 0} x ${scoreB ?? 0}` : match.startTime}</span>
                 </div>
             </div>
 
@@ -99,13 +106,14 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
 
                 {/* Team A */}
                 <button
-                    onClick={() => !disabled && onSelect(teamA.id)}
+                    onClick={() => !isLocked && onSelect(teamA.id)}
                     className={cn(
                         "flex-1 flex flex-col items-center gap-6 p-6 rounded-[2.5rem] border transition-all duration-500 relative overflow-hidden group/team",
                         selection === teamA.id
                             ? "bg-primary/10 border-primary/50 shadow-[0_0_30px_rgba(250,204,21,0.15)] scale-[1.02]"
                             : "bg-zinc-950/50 border-white/5 hover:border-white/10 hover:bg-white/5",
-                        disabled && "opacity-50 cursor-not-allowed"
+                        isLocked && selection !== teamA.id && "opacity-20 cursor-not-allowed",
+                        isLocked && selection === teamA.id && "border-primary/20"
                     )}
                 >
                     <div className={cn(
@@ -152,13 +160,14 @@ export default function GameCard({ match, selection, onSelect, disabled, isVerti
 
                 {/* Team B */}
                 <button
-                    onClick={() => !disabled && onSelect(teamB.id)}
+                    onClick={() => !isLocked && onSelect(teamB.id)}
                     className={cn(
                         "flex-1 flex flex-col items-center gap-6 p-6 rounded-[2.5rem] border transition-all duration-500 relative overflow-hidden group/team",
                         selection === teamB.id
                             ? "bg-primary/10 border-primary/50 shadow-[0_0_30px_rgba(250,204,21,0.15)] scale-[1.02]"
                             : "bg-zinc-950/50 border-white/5 hover:border-white/10 hover:bg-white/5",
-                        disabled && "opacity-50 cursor-not-allowed"
+                        isLocked && selection !== teamB.id && "opacity-20 cursor-not-allowed",
+                        isLocked && selection === teamB.id && "border-primary/20"
                     )}
                 >
                     <div className={cn(

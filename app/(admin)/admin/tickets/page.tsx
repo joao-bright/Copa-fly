@@ -125,9 +125,9 @@ export default function AdminTicketsPage() {
                                                 <div className="flex flex-col gap-1.5">
                                                     <div className="flex items-center gap-1.5">
                                                         <div className="h-1 flex-1 bg-zinc-900 rounded-full overflow-hidden min-w-[100px]">
-                                                            <div className="h-full bg-primary" style={{ width: `${(currentHits / 15) * 100}%` }} />
+                                                            <div className="h-full bg-primary" style={{ width: `${(matches.length > 0 ? (currentHits / matches.length) * 100 : 0)}%` }} />
                                                         </div>
-                                                        <span className="text-[10px] font-black text-white/20 italic">{currentHits}/15</span>
+                                                        <span className="text-[10px] font-black text-white/20 italic">{currentHits}/{matches.length}</span>
                                                     </div>
                                                     <span className="text-[8px] font-black text-white/10 uppercase tracking-widest">
                                                         {currentHits > 0 ? 'Palpites Certos' : 'Aguardando Resultados'}

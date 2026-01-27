@@ -151,7 +151,7 @@ export default function MyTickets() {
                                             </div>
                                             <div className="flex flex-col items-end gap-1">
                                                 <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.3em] leading-none">STATUS</span>
-                                                <span className="text-[10px] font-black text-primary italic uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/20">{currentHits}/15 acertos</span>
+                                                <span className="text-[10px] font-black text-primary italic uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/20">{currentHits}/{matches.length} acertos</span>
                                             </div>
                                         </div>
 

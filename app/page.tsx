@@ -142,6 +142,21 @@ export default function Home() {
         setShowTutorial(true);
       }
 
+      // Pre-fill selections with REAL results for LIVE/FINISHED matches
+      const realResults: Record<string, string> = {};
+      mRes.forEach((m: Match) => {
+        if (m.status !== 'SCHEDULED' && m.winnerId) {
+          realResults[m.id] = m.winnerId;
+        }
+      });
+
+      // Update selections for the current active ticket being simulated
+      setSelections(prev => {
+        const next = [...prev];
+        next[0] = { ...next[0], ...realResults };
+        return next;
+      });
+
       setLoading(false);
     };
     fetchData();
@@ -206,6 +221,18 @@ export default function Home() {
     if (step === 'GROUP_3') return round3Matches;
     return [];
   }, [step, round1Matches, round2Matches, round3Matches]);
+
+  const totalAvailableMatches = useMemo(() => {
+    return matches.filter(m => m.status === 'SCHEDULED' && m.phase === 'GROUP').length + 3; // 3 are Semis + Final
+  }, [matches]);
+
+  const currentHitsInSimulator = useMemo(() => {
+    const sel = selections[activeTicketIdx];
+    return matches.reduce((acc, m) => {
+      if (m.status !== 'SCHEDULED' && m.winnerId && sel[m.id] === m.winnerId) return acc + 1;
+      return acc;
+    }, 0);
+  }, [matches, selections, activeTicketIdx]);
 
   const semiMatches = useMemo(() => {
     const bracket = getBracketTeams(activeTicketIdx);
@@ -611,7 +638,13 @@ export default function Home() {
               <div className={cn("overflow-y-auto overflow-x-hidden space-y-4 pb-48 scrollbar-hide duration-700 ease-in-out transition-all px-1", showSimulator ? "flex-[0.45] scale-100" : "flex-1 scale-100 flex flex-col items-center")}>
                 {(step === 'SEMIS' ? semiMatches : step === 'FINAL' ? [finalMatch] : currentMatches).map((match: Match) => (
                   <div key={match.id} className={cn("w-full transition-all", !showSimulator && "max-w-md")}>
-                    <GameCard match={match} isVertical={showSimulator} selection={selections[activeTicketIdx][match.id] || null} onSelect={(teamId) => handleSelect(match.id, teamId)} />
+                    <GameCard
+                      match={match}
+                      isVertical={showSimulator}
+                      selection={selections[activeTicketIdx][match.id] || null}
+                      onSelect={(teamId) => handleSelect(match.id, teamId)}
+                      disabled={match.status !== 'SCHEDULED'}
+                    />
                   </div>
                 ))}
                 <div className="pt-10 pb-44 w-full max-w-md flex flex-col gap-3">
@@ -672,6 +705,13 @@ export default function Home() {
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
+          </div>
+          {/* Hit Counter Floating Badge for Simulator */}
+          <div className="fixed bottom-32 right-6 z-[120] pointer-events-none">
+            <div className="bg-primary/95 text-black font-black italic px-4 py-2 rounded-2xl shadow-2xl border border-black/10 animate-in slide-in-from-right-10 duration-700 flex flex-col items-center">
+              <span className="text-[7px] uppercase tracking-widest leading-none mb-0.5">ACERTOS REAIS</span>
+              <span className="text-xl leading-none">{currentHitsInSimulator}/{totalAvailableMatches}</span>
+            </div>
           </div>
         </div>
       </main>

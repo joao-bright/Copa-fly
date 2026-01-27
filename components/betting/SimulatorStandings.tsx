@@ -32,7 +32,9 @@ export default function SimulatorStandings({ teams, selections, group, matches, 
         );
 
         teamGroupMatches.forEach(m => {
-            const selectedWinnerId = selections[m.id];
+            // Priority: Real result if match is not SCHEDULED, otherwise user selection
+            const selectedWinnerId = (m.status !== 'SCHEDULED' && m.winnerId) ? m.winnerId : selections[m.id];
+
             if (selectedWinnerId === team.id) {
                 points += 3;
                 wins += 1;

@@ -211,7 +211,7 @@ export default function TicketDetails() {
                                             return acc;
                                         }, 0)}
                                     </span>
-                                    <span className="text-xs opacity-40 ml-1">/15 ACERTOS</span>
+                                    <span className="text-xs opacity-40 ml-1">/{matches.length} ACERTOS</span>
                                 </div>
                             </div>
                         </div>

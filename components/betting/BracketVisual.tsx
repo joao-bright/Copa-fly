@@ -37,9 +37,17 @@ export default function BracketVisual({ selections, bracket, standingsA, standin
         if (finalMatchReal && selections[finalMatchReal.id]) finalWinnerId = selections[finalMatchReal.id];
     }
 
-    const s1Winner = s1WinnerId ? (s1WinnerId === bracket.a1?.id ? bracket.a1 : bracket.b2) : null;
-    const s2Winner = s2WinnerId ? (s2WinnerId === bracket.b1?.id ? bracket.b1 : bracket.a2) : null;
-    const champion = finalWinnerId ? (finalWinnerId === s1Winner?.id ? s1Winner : s2Winner) : null;
+    const s1Record = matches?.find(m => m.phase === 'SEMI' && (m.startTime === '14:00' || (m.teamA?.id === bracket.a1?.id && m.teamB?.id === bracket.b2?.id)));
+    const s2Record = matches?.find(m => m.phase === 'SEMI' && (m.startTime === '15:00' || (m.teamA?.id === bracket.b1?.id && m.teamB?.id === bracket.a2?.id)));
+    const finalRecord = matches?.find(m => m.phase === 'FINAL');
+
+    const s1WinnerIdResolved = (s1Record?.status !== 'SCHEDULED' && s1Record?.winnerId) ? s1Record.winnerId : s1WinnerId;
+    const s2WinnerIdResolved = (s2Record?.status !== 'SCHEDULED' && s2Record?.winnerId) ? s2Record.winnerId : s2WinnerId;
+    const finalWinnerIdResolved = (finalRecord?.status !== 'SCHEDULED' && finalRecord?.winnerId) ? finalRecord.winnerId : finalWinnerId;
+
+    const s1Winner = s1WinnerIdResolved ? (s1WinnerIdResolved === bracket.a1?.id ? bracket.a1 : bracket.b2) : null;
+    const s2Winner = s2WinnerIdResolved ? (s2WinnerIdResolved === bracket.b1?.id ? bracket.b1 : bracket.a2) : null;
+    const champion = finalWinnerIdResolved ? (finalWinnerIdResolved === s1Winner?.id ? s1Winner : s2Winner) : null;
 
     return (
         <div className="w-full glass-panel rounded-[3rem] p-6 sm:p-8 border border-white/10 shadow-3xl relative overflow-hidden bg-black/40">
