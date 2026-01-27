@@ -105,15 +105,17 @@ export default function TicketDetails() {
             let displayTeamB = m.teamB;
 
             if (m.phase === 'SEMI') {
-                const isSemi1 = m.startTime === '14:00' || m.startTime === '12:00'; // Add flexibility
-                if (!displayTeamA) displayTeamA = isSemi1 ? bracketTeams.a1 : bracketTeams.b1;
-                if (!displayTeamB) displayTeamB = isSemi1 ? bracketTeams.b2 : bracketTeams.a2;
+                const semisList = matches.filter(mh => mh.phase === 'SEMI').sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+                const isSemi1 = m.id === semisList[0]?.id;
+                const isSemi2 = m.id === semisList[1]?.id;
+
+                if (!displayTeamA) displayTeamA = isSemi1 ? bracketTeams.a1 : (isSemi2 ? bracketTeams.b1 : null);
+                if (!displayTeamB) displayTeamB = isSemi1 ? bracketTeams.b2 : (isSemi2 ? bracketTeams.a2 : null);
             } else if (m.phase === 'FINAL') {
                 if (!displayTeamA || !displayTeamB) {
-                    const s1Match = matches.find(mh => mh.phase === 'SEMI' && (mh.startTime === '14:00' || mh.startTime === '12:00'));
-                    const s2Match = matches.find(mh => mh.phase === 'SEMI' && (mh.startTime === '15:00' || mh.startTime === '13:00'));
-                    const s1WinnerId = selections[s1Match?.id || ''];
-                    const s2WinnerId = selections[s2Match?.id || ''];
+                    const semisList = matches.filter(mh => mh.phase === 'SEMI').sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+                    const s1WinnerId = selections[semisList[0]?.id || ''];
+                    const s2WinnerId = selections[semisList[1]?.id || ''];
 
                     if (!displayTeamA) displayTeamA = teams.find(t => t.id === s1WinnerId) || null;
                     if (!displayTeamB) displayTeamB = teams.find(t => t.id === s2WinnerId) || null;
@@ -270,7 +272,7 @@ export default function TicketDetails() {
                 </div>
 
                 {activeTab === 'SIMULADOR' ? (
-                    <BracketVisual selections={selections} bracket={bracketTeams} standingsA={standingsA} standingsB={standingsB} matches={matches} />
+                    <BracketVisual selections={selections} bracket={bracketTeams} standingsA={standingsA} standingsB={standingsB} matches={matches} teams={teams} />
                 ) : (
                     renderResultados()
                 )}

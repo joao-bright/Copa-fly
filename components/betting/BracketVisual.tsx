@@ -16,10 +16,11 @@ interface BracketVisualProps {
     standingsA?: any[];
     standingsB?: any[];
     matches?: Match[];
+    teams?: Team[];
     ticketIdx?: number;
 }
 
-export default function BracketVisual({ selections, bracket, standingsA, standingsB, matches, ticketIdx }: BracketVisualProps) {
+export default function BracketVisual({ selections, bracket, standingsA, standingsB, matches, teams, ticketIdx }: BracketVisualProps) {
     const [expandedGroup, setExpandedGroup] = useState<'A' | 'B' | null>(null);
 
     // Resolve IDs: support both derived (simulator) and UUIDs (saved tickets)
@@ -27,8 +28,9 @@ export default function BracketVisual({ selections, bracket, standingsA, standin
     let s2WinnerId = selections['derived_s2'];
     let finalWinnerId = selections['derived_f1'];
 
-    const s1Record = matches?.find(m => m.phase === 'SEMI' && (m.startTime === '14:00' || m.startTime === '12:00'));
-    const s2Record = matches?.find(m => m.phase === 'SEMI' && (m.startTime === '15:00' || m.startTime === '13:00'));
+    const semisList = matches?.filter(m => m.phase === 'SEMI').sort((a, b) => (a.startTime || '').localeCompare(b.startTime || '')) || [];
+    const s1Record = semisList[0];
+    const s2Record = semisList[1];
     const finalRecord = matches?.find(m => m.phase === 'FINAL');
 
     if (matches) {
@@ -41,9 +43,9 @@ export default function BracketVisual({ selections, bracket, standingsA, standin
     const s2WinnerIdResolved = (s2Record?.status !== 'SCHEDULED' && s2Record?.winnerId) ? s2Record.winnerId : s2WinnerId;
     const finalWinnerIdResolved = (finalRecord?.status !== 'SCHEDULED' && finalRecord?.winnerId) ? finalRecord.winnerId : finalWinnerId;
 
-    const s1Winner = s1WinnerIdResolved ? (s1WinnerIdResolved === bracket.a1?.id ? bracket.a1 : bracket.b2) : null;
-    const s2Winner = s2WinnerIdResolved ? (s2WinnerIdResolved === bracket.b1?.id ? bracket.b1 : bracket.a2) : null;
-    const champion = finalWinnerIdResolved ? (finalWinnerIdResolved === s1Winner?.id ? s1Winner : s2Winner) : null;
+    const s1Winner = s1WinnerIdResolved ? (s1WinnerIdResolved === bracket.a1?.id ? bracket.a1 : (s1WinnerIdResolved === bracket.b2?.id ? bracket.b2 : teams?.find(t => t.id === s1WinnerIdResolved) || null)) : null;
+    const s2Winner = s2WinnerIdResolved ? (s2WinnerIdResolved === bracket.b1?.id ? bracket.b1 : (s2WinnerIdResolved === bracket.a2?.id ? bracket.a2 : teams?.find(t => t.id === s2WinnerIdResolved) || null)) : null;
+    const champion = finalWinnerIdResolved ? (teams?.find(t => t.id === finalWinnerIdResolved) || (finalWinnerIdResolved === s1Winner?.id ? s1Winner : s2Winner)) : null;
 
     return (
         <div className="w-full glass-panel rounded-[3rem] p-6 sm:p-8 border border-white/10 shadow-3xl relative overflow-hidden bg-black/40">
