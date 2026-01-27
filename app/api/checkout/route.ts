@@ -37,7 +37,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'Você já possui um bilhete ativo com este CPF.' }, { status: 400 });
         }
 
-        const fixedAmount = 19.90;
+        const fixedAmount = 9.90;
 
         // 1. Create a PENDING ticket in Supabase
         const { data: ticket, error: tError } = await supabase
